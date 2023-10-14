@@ -17,6 +17,8 @@
 package me.theentropyshard.jsonviewer;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -25,8 +27,14 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
+import java.util.Enumeration;
 
 public class Gui {
     private final CardLayout cardLayout;
@@ -34,6 +42,7 @@ public class Gui {
     private final JPanel view;
 
     private final RSyntaxTextArea textArea;
+    private final JTree jsonTree;
 
     public Gui() {
         this.initGui();
@@ -93,6 +102,8 @@ public class Gui {
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
+                    Gui.this.cardLayout.show(Gui.this.view, "textarea");
+
                     JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
 
                     fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files (*.json)", "json"));
@@ -115,6 +126,8 @@ public class Gui {
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
+                    Gui.this.cardLayout.show(Gui.this.view, "textarea");
+
                     String input = JOptionPane.showInputDialog(frame, "Enter the URL");
                     Gui.this.textArea.setText(Utils.readURL(input));
 
@@ -124,6 +137,8 @@ public class Gui {
         });
 
         beautify.addActionListener(e -> {
+            this.cardLayout.show(this.view, "textarea");
+
             String text = this.textArea.getText();
 
             if (!JsonFormatter.isJsonValid(text)) {
@@ -137,6 +152,8 @@ public class Gui {
         });
 
         minify.addActionListener(e -> {
+            this.cardLayout.show(this.view, "textarea");
+
             String text = this.textArea.getText();
 
             if (!JsonFormatter.isJsonValid(text)) {
@@ -151,12 +168,81 @@ public class Gui {
 
         this.view.add(scrollPane, "textarea");
 
-        JTree jsonTree = new JTree();
+        this.jsonTree = new JTree();
+        this.jsonTree.setShowsRootHandles(true);
+        this.jsonTree.setRootVisible(true);
+        JScrollPane treeScrollPane = new JScrollPane(this.jsonTree);
+
+        MouseAdapter ma = new MouseAdapter() {
+            // http://www.java2s.com/example/java/swing/expand-all-jtree-children-node.html
+            public void expandAllChildren(JTree tree, TreePath parent,
+                                          boolean expand) {
+                TreeNode node = (TreeNode) parent.getLastPathComponent();
+                if (node.getChildCount() > 0) {
+                    Enumeration e = node.children();
+                    while (e.hasMoreElements()) {
+                        TreeNode n = (TreeNode) e.nextElement();
+                        TreePath path = parent.pathByAddingChild(n);
+                        this.expandAllChildren(tree, path, expand);
+                    }
+                }
+
+                if (expand) {
+                    tree.expandPath(parent);
+                } else {
+                    tree.collapsePath(parent);
+                }
+            }
+
+            private void myPopupEvent(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+                JTree tree = (JTree) e.getSource();
+                TreePath path = tree.getPathForLocation(x, y);
+                if (path == null)
+                    return;
+
+                tree.setSelectionPath(path);
+
+                JPopupMenu popup = new JPopupMenu();
+                JMenuItem expandItem = new JMenuItem("Expand");
+                expandItem.addActionListener(ae -> {
+                    //jsonTree.expandPath(jsonTree.getSelectionPath());
+                    this.expandAllChildren(jsonTree, jsonTree.getSelectionPath(), true);
+                });
+                popup.add(expandItem);
+                JMenuItem collapseItem = new JMenuItem("Collapse");
+                collapseItem.addActionListener(ae -> {
+                    this.expandAllChildren(jsonTree, jsonTree.getSelectionPath(), false);
+                });
+                popup.add(collapseItem);
+                popup.show(tree, x, y);
+            }
+
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) this.myPopupEvent(e);
+            }
+
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) this.myPopupEvent(e);
+            }
+        };
+        this.jsonTree.addMouseListener(ma);
+
+        this.view.add(treeScrollPane, "treeview");
 
         treeViewer.addActionListener(e -> {
-            JOptionPane.showMessageDialog(
-                    frame, "Not implemented", "Error", JOptionPane.ERROR_MESSAGE
-            );
+            this.cardLayout.show(this.view, "treeview");
+
+            String text = this.textArea.getText();
+
+            if (!JsonFormatter.isJsonValid(text)) {
+                JOptionPane.showMessageDialog(frame, "JSON is not valid", "Error", JOptionPane.ERROR_MESSAGE);
+
+                return;
+            }
+
+            this.jsonTree.setModel(new DefaultTreeModel(JTreeBuilder.buildTree("object", new Gson().fromJson(text, JsonElement.class))));
         });
 
         this.cardLayout.show(this.view, "textarea");
