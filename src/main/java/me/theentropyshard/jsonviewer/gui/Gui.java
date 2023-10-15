@@ -29,14 +29,14 @@ import me.theentropyshard.jsonviewer.utils.SwingUtils;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.plaf.LayerUI;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.IntConsumer;
 
 public class Gui {
@@ -46,10 +46,14 @@ public class Gui {
     private final JPanel root;
     private final JTabbedPane views;
 
+    private final Map<JPanel, JLabel> titles;
+
     private int tabCounter;
 
     public Gui(JsonViewer jsonViewer) {
         this.initGui();
+
+        this.titles = new HashMap<>();
 
         this.frame = new JFrame("JsonViewer");
         this.frame.addWindowListener(new WindowAdapter() {
@@ -73,6 +77,7 @@ public class Gui {
             this.tabCounter--;
             this.views.removeTabAt(tab);
         });
+        this.views.setBorder(new EmptyBorder(3, 0, 3, 3));
         this.newTab();
 
         JMenuBar menuBar = new JMenuBar();
@@ -183,7 +188,7 @@ public class Gui {
                 case "fromurl":
                     view.switchToTextView();
                     SwingUtils.startWorker(() -> {
-                        String input = JOptionPane.showInputDialog(this.frame, "Enter the URL");
+                        String input = JOptionPane.showInputDialog(this.frame, "Enter the URL", "Url", JOptionPane.PLAIN_MESSAGE);
                         try {
                             view.setText(Utils.readURL(input));
                         } catch (IOException ex) {
@@ -224,8 +229,51 @@ public class Gui {
     }
 
     public void newTab() {
-        String name = "Tab " + ++this.tabCounter;
-        this.views.addTab(name, new JsonView());
+        JsonView jsonView = new JsonView();
+        this.views.addTab(null, jsonView);
+        JPanel tabComponent = new JPanel();
+        JLabel label = new JLabel("Tab " + ++this.tabCounter);
+        label.setOpaque(false);
+        tabComponent.add(label);
+        tabComponent.setOpaque(false);
+        tabComponent.addMouseListener(new MouseAdapter() {
+            private void myPopupEvent(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+
+                JPanel panel = (JPanel) e.getSource();
+
+                JPopupMenu popup = new JPopupMenu();
+
+                JMenuItem renameItem = new JMenuItem("Rename");
+                renameItem.addActionListener(al -> {
+                    String newName = JOptionPane.showInputDialog(Gui.this.frame, "Enter new name", "Rename", JOptionPane.PLAIN_MESSAGE);
+
+                    Gui.this.titles.get(panel).setText(newName);
+                });
+
+                popup.add(renameItem);
+
+                popup.show(panel, x, y);
+            }
+
+            public void mousePressed(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    this.myPopupEvent(e);
+                }
+            }
+
+            public void mouseReleased(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    this.myPopupEvent(e);
+                }
+            }
+        });
+
+        this.titles.put(tabComponent, label);
+
+        JLayer<JPanel> component = new JLayer<>(tabComponent, new DispatchEventLayerUI());
+        this.views.setTabComponentAt(this.views.indexOfComponent(jsonView), component);
     }
 
     private void initGui() {
@@ -233,5 +281,35 @@ public class Gui {
         JDialog.setDefaultLookAndFeelDecorated(true);
         JFrame.setDefaultLookAndFeelDecorated(true);
         FlatIntelliJLaf.setup();
+    }
+
+    // https://stackoverflow.com/a/38525967/19857533
+    static class DispatchEventLayerUI extends LayerUI<JPanel> {
+        @Override
+        public void installUI(JComponent c) {
+            super.installUI(c);
+            if (c instanceof JLayer) {
+                ((JLayer<?>) c).setLayerEventMask(AWTEvent.MOUSE_EVENT_MASK);
+            }
+        }
+
+        @Override
+        public void uninstallUI(JComponent c) {
+            if (c instanceof JLayer) {
+                ((JLayer<?>) c).setLayerEventMask(0);
+            }
+            super.uninstallUI(c);
+        }
+
+        @Override
+        protected void processMouseEvent(MouseEvent e, JLayer<? extends JPanel> l) {
+            this.dispatchEvent(e);
+        }
+
+        private void dispatchEvent(MouseEvent e) {
+            Component src = e.getComponent();
+            Container tgt = SwingUtilities.getAncestorOfClass(JTabbedPane.class, src);
+            tgt.dispatchEvent(SwingUtilities.convertMouseEvent(src, e, tgt));
+        }
     }
 }
