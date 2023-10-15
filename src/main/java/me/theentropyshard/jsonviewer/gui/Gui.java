@@ -192,6 +192,15 @@ public class Gui {
                     view.switchToTextView();
                     SwingUtils.startWorker(() -> {
                         String input = JOptionPane.showInputDialog(this.frame, "Enter the URL", "Url", JOptionPane.PLAIN_MESSAGE);
+                        if (input.isEmpty()) {
+                            return;
+                        }
+
+                        if (Utils.isUrlInvalid(input)) {
+                            JOptionPane.showMessageDialog(this.frame, "Invalid URL: " + input, "Error", JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
+
                         try {
                             view.setText(Utils.readURL(input));
                             this.names.get(view).setText(Utils.getLastPathComponent(input));

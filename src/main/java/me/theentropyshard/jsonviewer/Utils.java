@@ -19,6 +19,8 @@ package me.theentropyshard.jsonviewer;
 import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -78,5 +80,15 @@ public class Utils {
 
     public static String getLastPathComponent(String name) {
         return name.substring(name.lastIndexOf("/") + 1);
+    }
+
+    public static boolean isUrlInvalid(String url) {
+        try {
+            new URL(url).toURI();
+        } catch (URISyntaxException | MalformedURLException e) {
+            return true;
+        }
+
+        return false;
     }
 }
