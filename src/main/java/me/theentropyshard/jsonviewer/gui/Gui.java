@@ -47,6 +47,7 @@ public class Gui {
     private final JTabbedPane views;
 
     private final Map<JPanel, JLabel> titles;
+    private final Map<JsonView, JLabel> names;
 
     private int tabCounter;
 
@@ -54,6 +55,7 @@ public class Gui {
         this.initGui();
 
         this.titles = new HashMap<>();
+        this.names = new HashMap<>();
 
         this.frame = new JFrame("JsonViewer");
         this.frame.addWindowListener(new WindowAdapter() {
@@ -179,6 +181,7 @@ public class Gui {
 
                         try {
                             view.setText(Utils.readFile(selectedFile));
+                            this.names.get(view).setText(selectedFile.getName());
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(this.frame, "Unable to load JSON from File", "Error", JOptionPane.ERROR_MESSAGE);
                             ex.printStackTrace();
@@ -191,6 +194,7 @@ public class Gui {
                         String input = JOptionPane.showInputDialog(this.frame, "Enter the URL", "Url", JOptionPane.PLAIN_MESSAGE);
                         try {
                             view.setText(Utils.readURL(input));
+                            this.names.get(view).setText(Utils.getLastPathComponent(input));
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(this.frame, "Unable to load JSON from URL", "Error", JOptionPane.ERROR_MESSAGE);
                             ex.printStackTrace();
@@ -271,6 +275,7 @@ public class Gui {
         });
 
         this.titles.put(tabComponent, label);
+        this.names.put(jsonView, label);
 
         JLayer<JPanel> component = new JLayer<>(tabComponent, new DispatchEventLayerUI());
         this.views.setTabComponentAt(this.views.indexOfComponent(jsonView), component);

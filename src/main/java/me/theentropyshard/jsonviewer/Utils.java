@@ -75,4 +75,8 @@ public class Utils {
             return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
         }
     }
+
+    public static String getLastPathComponent(String name) {
+        return name.substring(name.lastIndexOf("/") + 1);
+    }
 }
