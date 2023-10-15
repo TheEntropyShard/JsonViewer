@@ -16,12 +16,32 @@
 
 package me.theentropyshard.jsonviewer;
 
+import me.theentropyshard.jsonviewer.config.Config;
+
+import java.io.IOException;
+import java.nio.file.Paths;
+
 public class JsonViewer {
+    private final Config config;
+
     public JsonViewer() {
-        new Gui();
+        this.config = new Config(Paths.get(System.getProperty("user.home"), "JsonViewer.json"));
+
+        try {
+            this.config.load();
+        } catch (IOException e) {
+            System.err.println("Unable to load config");
+            e.printStackTrace();
+        }
+
+        new Gui(this);
     }
 
     public static void start() {
         new JsonViewer();
+    }
+
+    public Config getConfig() {
+        return this.config;
     }
 }

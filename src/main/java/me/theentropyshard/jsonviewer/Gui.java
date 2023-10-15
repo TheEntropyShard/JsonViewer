@@ -31,9 +31,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.Enumeration;
 
 public class Gui {
@@ -44,10 +44,21 @@ public class Gui {
     private final RSyntaxTextArea textArea;
     private final JTree jsonTree;
 
-    public Gui() {
+    public Gui(JsonViewer jsonViewer) {
         this.initGui();
 
         JFrame frame = new JFrame("JsonViewer");
+        frame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                try {
+                    jsonViewer.getConfig().save();
+                } catch (IOException ex) {
+                    System.err.println("Unable to save config");
+                    ex.printStackTrace();
+                }
+            }
+        });
 
         this.root = new JPanel(new BorderLayout());
         this.root.setPreferredSize(new Dimension(1088, 576));
@@ -79,7 +90,18 @@ public class Gui {
         beautify.setPreferredSize(new Dimension(beautify.getPreferredSize().width, height));
         leftPanel.add(beautify);
         JComboBox<String> comp = new JComboBox<>(new String[]{"1 Space", "2 Space", "3 Space", "4 Space"});
-        comp.setSelectedIndex(3);
+        comp.addItemListener(e -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                jsonViewer.getConfig().setValue("beautifySpace", String.valueOf(comp.getSelectedIndex()));
+            }
+        });
+
+        int space = Integer.parseInt(jsonViewer.getConfig().getValue("beautifySpace", "3"));
+        if (space < 0 || space > 3) {
+            space = 3;
+        }
+        comp.setSelectedIndex(space);
+
         comp.setPreferredSize(new Dimension(comp.getPreferredSize().width, height));
         leftPanel.add(comp);
         JButton minify = new JButton("Minify");
