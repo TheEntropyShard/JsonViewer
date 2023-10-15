@@ -17,6 +17,7 @@
 package me.theentropyshard.jsonviewer;
 
 import me.theentropyshard.jsonviewer.config.Config;
+import me.theentropyshard.jsonviewer.gui.Gui;
 
 import java.io.IOException;
 import java.nio.file.Paths;
