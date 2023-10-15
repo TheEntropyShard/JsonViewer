@@ -27,6 +27,10 @@ public class JTreeBuilder {
     public static DefaultMutableTreeNode buildTree(String name, JsonElement root) {
         DefaultMutableTreeNode treeNode = new DefaultMutableTreeNode(name);
 
+        if (root == null) {
+            return treeNode;
+        }
+
         if (root.isJsonArray()) {
             JsonArray jsonArray = root.getAsJsonArray();
             for (int i = 0; i < jsonArray.size(); i++) {
