@@ -25,9 +25,13 @@ import com.google.gson.stream.JsonWriter;
 import java.io.StringWriter;
 
 public class JsonFormatter {
+    private static final Gson GSON = new GsonBuilder()
+            .disableHtmlEscaping()
+            .create();
+
     public static boolean isJsonValid(String json) {
         try {
-            new Gson().fromJson(json, JsonElement.class);
+            JsonFormatter.GSON.fromJson(json, JsonElement.class);
         } catch (JsonSyntaxException ignored) {
             return false;
         }
@@ -46,7 +50,9 @@ public class JsonFormatter {
 
     public static String formatJson(String json, int indent) {
         try (StringWriter stringWriter = new StringWriter()) {
-            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            Gson gson = JsonFormatter.GSON.newBuilder()
+                    .setPrettyPrinting()
+                    .create();
             JsonWriter writer = gson.newJsonWriter(stringWriter);
             writer.setIndent(JsonFormatter.getIndent(indent));
             JsonElement element = gson.fromJson(json, JsonElement.class);
@@ -59,8 +65,6 @@ public class JsonFormatter {
     }
 
     public static String minifyJson(String json) {
-        Gson gson = new Gson();
-        JsonElement element = gson.fromJson(json, JsonElement.class);
-        return gson.toJson(element);
+        return JsonFormatter.GSON.toJson(JsonFormatter.GSON.fromJson(json, JsonElement.class));
     }
 }
