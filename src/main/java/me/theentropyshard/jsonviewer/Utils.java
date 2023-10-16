@@ -16,6 +16,8 @@
 
 package me.theentropyshard.jsonviewer;
 
+import me.theentropyshard.jsonviewer.exception.NonJsonContentTypeException;
+
 import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
@@ -54,12 +56,23 @@ public class Utils {
         return Utils.inputStreamToString(Files.newInputStream(file.toPath()));
     }
 
-    public static String readURL(String url) throws IOException {
+    public static String readURL(String url) throws IOException, NonJsonContentTypeException {
         HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
         c.setRequestMethod("GET");
         c.setRequestProperty("Accept", "application/json");
         c.setRequestProperty("User-Agent", Utils.USER_AGENT);
-        return Utils.inputStreamToString(c.getInputStream());
+
+        int responseCode = c.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            String headerField = c.getHeaderField("Content-Type");
+            if (!headerField.equals("application/json")) {
+                throw new NonJsonContentTypeException(headerField);
+            }
+            InputStream inputStream = c.getInputStream();
+            return Utils.inputStreamToString(inputStream);
+        } else {
+            throw new IOException("Server returned status code " + responseCode);
+        }
     }
 
     public static String inputStreamToString(InputStream inputStream) throws IOException {

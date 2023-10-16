@@ -24,6 +24,7 @@ import me.theentropyshard.jsonviewer.JTreeBuilder;
 import me.theentropyshard.jsonviewer.JsonFormatter;
 import me.theentropyshard.jsonviewer.JsonViewer;
 import me.theentropyshard.jsonviewer.Utils;
+import me.theentropyshard.jsonviewer.exception.NonJsonContentTypeException;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 import javax.swing.*;
@@ -204,6 +205,8 @@ public class Gui {
                         try {
                             view.setText(Utils.readURL(input));
                             this.names.get(view).setText(Utils.getLastPathComponent(input));
+                        } catch (NonJsonContentTypeException ex) {
+                            JOptionPane.showMessageDialog(this.frame, "Expected JSON, but got " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(this.frame, "Unable to load JSON from URL", "Error", JOptionPane.ERROR_MESSAGE);
                             ex.printStackTrace();
