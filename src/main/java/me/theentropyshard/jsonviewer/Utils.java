@@ -65,7 +65,7 @@ public class Utils {
         int responseCode = c.getResponseCode();
         if (responseCode == HttpURLConnection.HTTP_OK) {
             String headerField = c.getHeaderField("Content-Type");
-            if (!headerField.equals("application/json")) {
+            if (!headerField.startsWith("application/json")) {
                 throw new NonJsonContentTypeException(headerField);
             }
             InputStream inputStream = c.getInputStream();
