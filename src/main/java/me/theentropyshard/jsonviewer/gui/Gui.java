@@ -163,7 +163,16 @@ public class Gui {
                     break;
                 case "treeview":
                     view.switchToTreeView();
-                    view.setModel(new DefaultTreeModel(JTreeBuilder.buildTree("object", new Gson().fromJson(text, JsonElement.class))));
+                    JsonElement root = new Gson().fromJson(text, JsonElement.class);
+                    String name;
+                    if (root.isJsonObject()) {
+                        name = "object";
+                    } else if (root.isJsonArray()) {
+                        name = "array [" + root.getAsJsonArray().size() + "]";
+                    } else {
+                        name = "unknown";
+                    }
+                    view.setModel(new DefaultTreeModel(JTreeBuilder.buildTree(name, root)));
                     break;
                 case "fromfile":
                     view.switchToTextView();

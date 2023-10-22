@@ -36,7 +36,7 @@ public class JTreeBuilder {
             for (int i = 0; i < jsonArray.size(); i++) {
                 JsonElement jsonElement = jsonArray.get(i);
                 if (jsonElement.isJsonPrimitive()) {
-                    treeNode.add(new DefaultMutableTreeNode(jsonElement.toString()));
+                    treeNode.add(new DefaultMutableTreeNode("[" + i + "]: " + jsonElement));
                 } else {
                     treeNode.add(buildTree(String.format("[%d]", i), jsonElement));
                 }
@@ -49,7 +49,11 @@ public class JTreeBuilder {
                 if (value.isJsonPrimitive()) {
                     treeNode.add(new DefaultMutableTreeNode(entry.getKey() + ": " + value));
                 } else {
-                    treeNode.add(buildTree(entry.getKey(), value));
+                    String nodeName = entry.getKey();
+                    if (value.isJsonArray()) {
+                        nodeName = entry.getKey() + " [" + value.getAsJsonArray().size() + "]";
+                    }
+                    treeNode.add(buildTree(nodeName, value));
                 }
             }
         }

@@ -28,6 +28,9 @@ public class JsonFormatter {
     private static final Gson GSON = new GsonBuilder()
             .disableHtmlEscaping()
             .create();
+    private static final Gson PRETTY_GSON = JsonFormatter.GSON.newBuilder()
+            .setPrettyPrinting()
+            .create();
 
     public static boolean isJsonValid(String json) {
         try {
@@ -40,6 +43,21 @@ public class JsonFormatter {
     }
 
     private static String getIndent(int indent) {
+        if (indent < 1) {
+            throw new IllegalArgumentException("Indent cannot be less than 1 space");
+        }
+
+        switch (indent) {
+            case 1:
+                return " ";
+            case 2:
+                return "  ";
+            case 3:
+                return "   ";
+            case 4:
+                return "    ";
+        }
+
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < indent; i++) {
             builder.append(" ");
@@ -50,13 +68,10 @@ public class JsonFormatter {
 
     public static String formatJson(String json, int indent) {
         try (StringWriter stringWriter = new StringWriter()) {
-            Gson gson = JsonFormatter.GSON.newBuilder()
-                    .setPrettyPrinting()
-                    .create();
-            JsonWriter writer = gson.newJsonWriter(stringWriter);
+            JsonWriter writer = JsonFormatter.PRETTY_GSON.newJsonWriter(stringWriter);
             writer.setIndent(JsonFormatter.getIndent(indent));
-            JsonElement element = gson.fromJson(json, JsonElement.class);
-            gson.toJson(element, writer);
+            JsonElement element = JsonFormatter.PRETTY_GSON.fromJson(json, JsonElement.class);
+            JsonFormatter.PRETTY_GSON.toJson(element, writer);
             return stringWriter.toString();
         } catch (Exception e) {
             e.printStackTrace();
