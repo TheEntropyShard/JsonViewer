@@ -36,6 +36,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntConsumer;
@@ -155,15 +156,26 @@ public class Gui {
             switch (e.getActionCommand()) {
                 case "beautify":
                     view.switchToTextView();
-                    view.setText(JsonFormatter.formatJson(text, comp.getSelectedIndex() + 1));
+                    String beautyText = JsonFormatter.formatJson(text, comp.getSelectedIndex() + 1);
+                    int textSize = beautyText.getBytes(StandardCharsets.UTF_8).length;
+                    view.setSizeInKBs(Utils.round(textSize, 2));
+                    view.setText(beautyText);
                     break;
                 case "minify":
                     view.switchToTextView();
-                    view.setText(JsonFormatter.minifyJson(text));
+                    String minifiedText = JsonFormatter.minifyJson(text);
+                    int size = minifiedText.getBytes(StandardCharsets.UTF_8).length;
+                    view.setSizeInKBs(Utils.round(size, 2));
+                    view.setText(minifiedText);
                     break;
                 case "treeview":
                     view.switchToTreeView();
                     JsonElement root = new Gson().fromJson(text, JsonElement.class);
+
+                    if (root == null) {
+                        break;
+                    }
+
                     String name;
                     if (root.isJsonObject()) {
                         name = "object";
@@ -190,7 +202,12 @@ public class Gui {
                         }
 
                         try {
-                            view.setText(Utils.readFile(selectedFile));
+                            String fileText = Utils.readFile(selectedFile);
+
+                            int tSize = fileText.getBytes(StandardCharsets.UTF_8).length;
+                            view.setSizeInKBs(Utils.round(tSize, 2));
+
+                            view.setText(fileText);
                             this.names.get(view).setText(selectedFile.getName());
                         } catch (IOException ex) {
                             JOptionPane.showMessageDialog(this.frame, "Unable to load JSON from File", "Error", JOptionPane.ERROR_MESSAGE);
@@ -212,7 +229,12 @@ public class Gui {
                         }
 
                         try {
-                            view.setText(Utils.readURL(input));
+                            String urlText = Utils.readURL(input);
+
+                            int tSize = urlText.getBytes(StandardCharsets.UTF_8).length;
+                            view.setSizeInKBs(Utils.round(tSize, 2));
+
+                            view.setText(urlText);
                             this.names.get(view).setText(Utils.getLastPathComponent(input));
                         } catch (NonJsonContentTypeException ex) {
                             JOptionPane.showMessageDialog(this.frame, "Expected JSON, but got " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

@@ -22,6 +22,9 @@ import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import javax.swing.text.BadLocationException;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -32,20 +35,70 @@ import java.util.Enumeration;
 
 public class JsonView extends JPanel {
     private final CardLayout cardLayout;
+    private final JPanel view;
     private final RSyntaxTextArea textArea;
     private final JTree jsonTree;
+    private final JLabel lineLabel;
+    private final JLabel columnLabel;
+    private final JLabel sizeLabel;
+
+    private int line;
+    private int column;
+    private double sizeInKBs;
 
     public JsonView() {
+        super(new BorderLayout());
+
         this.cardLayout = new CardLayout();
-        this.setLayout(this.cardLayout);
+        this.view = new JPanel(this.cardLayout);
 
         this.textArea = this.makeTextArea();
         RTextScrollPane textScrollPane = new RTextScrollPane(this.textArea);
-        this.add(textScrollPane, "textView");
+        this.view.add(textScrollPane, "textView");
 
         this.jsonTree = this.makeJsonTree();
         JScrollPane treeScrollPane = new JScrollPane(this.jsonTree);
-        this.add(treeScrollPane, "treeView");
+        this.view.add(treeScrollPane, "treeView");
+
+        this.add(this.view, BorderLayout.CENTER);
+
+        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        this.lineLabel = new JLabel("Line: " + this.line + ",");
+        statusBar.add(this.lineLabel);
+        this.columnLabel = new JLabel("Column: " + this.line + ",");
+        statusBar.add(this.columnLabel);
+        this.sizeLabel = new JLabel("Size: " + this.line + " KB");
+        statusBar.add(this.sizeLabel);
+
+        this.add(statusBar, BorderLayout.SOUTH);
+
+        this.textArea.addCaretListener(e -> {
+            int lineNum = 1;
+            int columnNum = 1;
+
+            int caretPosition = JsonView.this.textArea.getCaretPosition();
+            int lineOfOffset = 1;
+            try {
+                lineOfOffset = JsonView.this.textArea.getLineOfOffset(caretPosition);
+            } catch (BadLocationException ignored) {
+                ignored.printStackTrace();
+            }
+
+            lineNum = lineOfOffset;
+            try {
+                columnNum = caretPosition - JsonView.this.textArea.getLineStartOffset(lineNum);
+            } catch (BadLocationException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            // We have to add one here because line numbers start at 0 for getLineOfOffset and we want it to start at 1 for display.
+            lineNum += 1;
+            columnNum += 1;
+
+            JsonView.this.setLine(lineNum);
+            JsonView.this.setColumn(columnNum);
+        });
     }
 
     private RSyntaxTextArea makeTextArea() {
@@ -147,11 +200,11 @@ public class JsonView extends JPanel {
     }
 
     public void switchToTextView() {
-        this.cardLayout.show(this, "textView");
+        this.cardLayout.show(this.view, "textView");
     }
 
     public void switchToTreeView() {
-        this.cardLayout.show(this, "treeView");
+        this.cardLayout.show(this.view, "treeView");
     }
 
     public void changeFontSize(int size) {
@@ -168,5 +221,32 @@ public class JsonView extends JPanel {
 
     public void setModel(TreeModel model) {
         this.jsonTree.setModel(model);
+    }
+
+    public int getLine() {
+        return this.line;
+    }
+
+    public void setLine(int line) {
+        this.line = line;
+        this.lineLabel.setText("Line: " + this.line + ",");
+    }
+
+    public int getColumn() {
+        return this.column;
+    }
+
+    public void setColumn(int column) {
+        this.column = column;
+        this.columnLabel.setText("Column: " + this.column + ",");
+    }
+
+    public double getSizeInKBs() {
+        return this.sizeInKBs;
+    }
+
+    public void setSizeInKBs(double sizeInKBs) {
+        this.sizeInKBs = sizeInKBs;
+        this.sizeLabel.setText("Size: " + this.sizeInKBs + " KB");
     }
 }
