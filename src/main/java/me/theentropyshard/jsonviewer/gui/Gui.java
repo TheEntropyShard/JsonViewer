@@ -157,15 +157,20 @@ public class Gui {
                 case "beautify":
                     view.switchToTextView();
                     String beautyText = JsonFormatter.formatJson(text, comp.getSelectedIndex() + 1);
+
+                    if (beautyText == null) {
+                        return;
+                    }
+
                     int textSize = beautyText.getBytes(StandardCharsets.UTF_8).length;
-                    view.setSizeInKBs(Utils.round(textSize, 2));
+                    view.setSizeInKBs(Utils.round(textSize / 1000.0, 2));
                     view.setText(beautyText);
                     break;
                 case "minify":
                     view.switchToTextView();
                     String minifiedText = JsonFormatter.minifyJson(text);
                     int size = minifiedText.getBytes(StandardCharsets.UTF_8).length;
-                    view.setSizeInKBs(Utils.round(size, 2));
+                    view.setSizeInKBs(Utils.round(size / 1000.0, 2));
                     view.setText(minifiedText);
                     break;
                 case "treeview":
@@ -205,7 +210,7 @@ public class Gui {
                             String fileText = Utils.readFile(selectedFile);
 
                             int tSize = fileText.getBytes(StandardCharsets.UTF_8).length;
-                            view.setSizeInKBs(Utils.round(tSize, 2));
+                            view.setSizeInKBs(Utils.round(tSize / 1000.0, 2));
 
                             view.setText(fileText);
                             this.names.get(view).setText(selectedFile.getName());
@@ -232,7 +237,7 @@ public class Gui {
                             String urlText = Utils.readURL(input);
 
                             int tSize = urlText.getBytes(StandardCharsets.UTF_8).length;
-                            view.setSizeInKBs(Utils.round(tSize, 2));
+                            view.setSizeInKBs(Utils.round(tSize / 1000.0, 2));
 
                             view.setText(urlText);
                             this.names.get(view).setText(Utils.getLastPathComponent(input));
