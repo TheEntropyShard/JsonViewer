@@ -296,6 +296,10 @@ public class Gui {
                 renameItem.addActionListener(al -> {
                     String newName = JOptionPane.showInputDialog(Gui.this.frame, "Enter new name", "Rename", JOptionPane.PLAIN_MESSAGE);
 
+                    if (newName == null || newName.isEmpty()) {
+                        return;
+                    }
+
                     Gui.this.titles.get(panel).setText(newName);
                 });
 
