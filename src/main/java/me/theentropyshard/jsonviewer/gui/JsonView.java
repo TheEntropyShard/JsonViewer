@@ -33,6 +33,8 @@ public class JsonView extends JPanel {
     private final JLabel columnLabel;
     private final JLabel sizeLabel;
 
+    private boolean isTextViewCurrent;
+
     public JsonView() {
         super(new BorderLayout());
 
@@ -70,10 +72,12 @@ public class JsonView extends JPanel {
 
     public void switchToTextView() {
         this.cardLayout.show(this.view, "textView");
+        this.isTextViewCurrent = true;
     }
 
     public void switchToTreeView() {
         this.cardLayout.show(this.view, "treeView");
+        this.isTextViewCurrent = false;
     }
 
     public void setText(String text) {
@@ -90,5 +94,9 @@ public class JsonView extends JPanel {
 
     public void setSizeInKBs(double sizeInKBs) {
         this.sizeLabel.setText("Size: " + sizeInKBs + " KB");
+    }
+
+    public boolean isTextViewCurrent() {
+        return this.isTextViewCurrent;
     }
 }
