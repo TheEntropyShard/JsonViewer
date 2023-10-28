@@ -185,6 +185,12 @@ public class MainView extends JPanel {
                 ex.printStackTrace();
             }
 
+            if (!this.jsonService.isJsonValid(fileText)) {
+                Gui.showErrorDialog("Got invalid JSON from File. Check console.");
+                System.err.println(fileText);
+                return;
+            }
+
             this.setJsonText(fileText);
             this.names.get(view).setText(selectedFile.getName());
         });
@@ -214,6 +220,12 @@ public class MainView extends JPanel {
                 ex.printStackTrace();
             }
 
+            if (!this.jsonService.isJsonValid(urlText)) {
+                Gui.showErrorDialog("Got invalid JSON from Url. Check console.");
+                System.err.println(urlText);
+                return;
+            }
+
             this.setJsonText(urlText);
             this.names.get(view).setText(Utils.getLastPathComponent(input));
         });
@@ -223,7 +235,15 @@ public class MainView extends JPanel {
         JsonView view = this.getCurrentView();
         view.switchToTreeView();
 
-        JsonElement rootElement = new Gson().fromJson(view.getText(), JsonElement.class);
+        String text = view.getText();
+
+        if (!this.jsonService.isJsonValid(text)) {
+            Gui.showErrorDialog("Got invalid JSON. Check console.");
+            System.err.println(text);
+            return;
+        }
+
+        JsonElement rootElement = new Gson().fromJson(text, JsonElement.class);
 
         if (rootElement == null) {
             return;
@@ -245,8 +265,15 @@ public class MainView extends JPanel {
         JsonView view = this.getCurrentView();
         view.switchToTextView();
 
+        String text = view.getText();
+        if (!this.jsonService.isJsonValid(text)) {
+            Gui.showErrorDialog("Got invalid JSON. Check console.");
+            System.err.println(text);
+            return;
+        }
+
         int selectedIndex = this.controlsPanel.getIndentCombo().getSelectedIndex();
-        String formattedJson = this.jsonService.formatJson(view.getText(), selectedIndex + 1);
+        String formattedJson = this.jsonService.formatJson(text, selectedIndex + 1);
         this.setJsonText(formattedJson);
     }
 
@@ -259,14 +286,30 @@ public class MainView extends JPanel {
         this.jsonViewer.getConfig().setValue("beautifySpace", String.valueOf(selectedIndex));
 
         JsonView view = this.getCurrentView();
-        this.setJsonText(this.jsonService.formatJson(view.getText(), selectedIndex + 1));
+        String text = view.getText();
+
+        if (!this.jsonService.isJsonValid(text)) {
+            Gui.showErrorDialog("Got invalid JSON. Check console.");
+            System.err.println(text);
+            return;
+        }
+
+        this.setJsonText(this.jsonService.formatJson(text, selectedIndex + 1));
     }
 
     private void onMinifyButtonPressed(ActionEvent e) {
         JsonView view = this.getCurrentView();
         view.switchToTextView();
 
-        String minifiedJson = this.jsonService.minifyJson(view.getText());
+        String text = view.getText();
+
+        if (!this.jsonService.isJsonValid(text)) {
+            Gui.showErrorDialog("Got invalid JSON. Check console.");
+            System.err.println(text);
+            return;
+        }
+
+        String minifiedJson = this.jsonService.minifyJson(text);
         this.setJsonText(minifiedJson);
     }
 }

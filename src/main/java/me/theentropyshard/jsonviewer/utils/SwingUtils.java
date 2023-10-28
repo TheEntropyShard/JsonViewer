@@ -23,7 +23,7 @@ public final class SwingUtils {
     public static void startWorker(Runnable r) {
         new SwingWorker<Void, Void>() {
             @Override
-            protected Void doInBackground() throws Exception {
+            protected Void doInBackground() {
                 r.run();
                 return null;
             }
