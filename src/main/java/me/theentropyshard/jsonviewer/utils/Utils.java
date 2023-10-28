@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package me.theentropyshard.jsonviewer;
+package me.theentropyshard.jsonviewer.utils;
 
 import me.theentropyshard.jsonviewer.exception.NonJsonContentTypeException;
 
-import java.awt.*;
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -30,21 +29,6 @@ import java.util.Objects;
 
 public class Utils {
     public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36";
-
-    public static void centerWindow(Window window, int screen) {
-        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
-        GraphicsDevice[] allDevices = env.getScreenDevices();
-
-        if (screen < 0 || screen >= allDevices.length) {
-            screen = 0;
-        }
-
-        Rectangle bounds = allDevices[screen].getDefaultConfiguration().getBounds();
-        window.setLocation(
-                ((bounds.width - window.getWidth()) / 2) + bounds.x,
-                ((bounds.height - window.getHeight()) / 2) + bounds.y
-        );
-    }
 
     public static String readResource(String path) throws IOException {
         try (InputStream inputStream = Utils.class.getResourceAsStream(path)) {

@@ -23,7 +23,7 @@ import com.google.gson.JsonElement;
 import me.theentropyshard.jsonviewer.JTreeBuilder;
 import me.theentropyshard.jsonviewer.JsonFormatter;
 import me.theentropyshard.jsonviewer.JsonViewer;
-import me.theentropyshard.jsonviewer.Utils;
+import me.theentropyshard.jsonviewer.utils.Utils;
 import me.theentropyshard.jsonviewer.exception.NonJsonContentTypeException;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
@@ -266,7 +266,7 @@ public class Gui {
         this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         this.frame.add(this.root, BorderLayout.CENTER);
         this.frame.pack();
-        Utils.centerWindow(this.frame, 0);
+        SwingUtils.centerWindow(this.frame, 0);
         this.frame.setVisible(true);
     }
 
