@@ -83,15 +83,7 @@ public class Gui {
         this.views.setBorder(new EmptyBorder(3, 0, 3, 3));
         this.newTab();
 
-        JMenuBar menuBar = new JMenuBar();
-        this.frame.setJMenuBar(menuBar);
-
-        JMenu fileMenu = new JMenu("File");
-        menuBar.add(fileMenu);
-
-        JMenuItem newTabItem = new JMenuItem("New tab");
-        newTabItem.addActionListener(e -> this.newTab());
-        fileMenu.add(newTabItem);
+        this.frame.setJMenuBar(this.makeJMenuBar());
 
         JPanel borderPanel = new JPanel(new BorderLayout());
         JPanel leftPanel = new JPanel(new GridLayout(0, 1, 0, 1));
@@ -269,6 +261,19 @@ public class Gui {
         this.frame.pack();
         SwingUtils.centerWindow(this.frame, 0);
         this.frame.setVisible(true);
+    }
+
+    private JMenuBar makeJMenuBar() {
+        JMenuBar menuBar = new JMenuBar();
+
+        JMenu fileMenu = new JMenu("File");
+        menuBar.add(fileMenu);
+
+        JMenuItem newTabItem = new JMenuItem("New tab");
+        newTabItem.addActionListener(e -> this.newTab());
+        fileMenu.add(newTabItem);
+
+        return menuBar;
     }
 
     public JsonView getCurrentView() {
