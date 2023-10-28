@@ -45,7 +45,6 @@ public class Gui {
     public static final int BUTTON_HEIGHT = 35;
 
     private final JFrame frame;
-    private final JPanel root;
     private final JTabbedPane views;
 
     private final Map<JPanel, JLabel> titles;
@@ -71,9 +70,6 @@ public class Gui {
                 }
             }
         });
-
-        this.root = new JPanel(new BorderLayout());
-        this.root.setPreferredSize(new Dimension(1088, 576));
 
         this.views = new JTabbedPane(JTabbedPane.TOP);
         this.views.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, Boolean.TRUE);
@@ -175,21 +171,21 @@ public class Gui {
                     break;
                 case "treeview":
                     view.switchToTreeView();
-                    JsonElement root = new Gson().fromJson(text, JsonElement.class);
+                    JsonElement rootElement = new Gson().fromJson(text, JsonElement.class);
 
-                    if (root == null) {
+                    if (rootElement == null) {
                         break;
                     }
 
                     String name;
-                    if (root.isJsonObject()) {
+                    if (rootElement.isJsonObject()) {
                         name = "object";
-                    } else if (root.isJsonArray()) {
-                        name = "array [" + root.getAsJsonArray().size() + "]";
+                    } else if (rootElement.isJsonArray()) {
+                        name = "array [" + rootElement.getAsJsonArray().size() + "]";
                     } else {
                         name = "unknown";
                     }
-                    view.setModel(new DefaultTreeModel(JTreeBuilder.buildTree(name, root)));
+                    view.setModel(new DefaultTreeModel(JTreeBuilder.buildTree(name, rootElement)));
                     break;
                 case "fromfile":
                     view.switchToTextView();
@@ -260,11 +256,13 @@ public class Gui {
         minify.addActionListener(buttonListener);
         treeViewer.addActionListener(buttonListener);
 
-        this.root.add(this.views, BorderLayout.CENTER);
-        this.root.add(borderPanel, BorderLayout.WEST);
+        JPanel root = new JPanel(new BorderLayout());
+        root.setPreferredSize(new Dimension(1088, 576));
+        root.add(this.views, BorderLayout.CENTER);
+        root.add(borderPanel, BorderLayout.WEST);
 
         this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.frame.add(this.root, BorderLayout.CENTER);
+        this.frame.add(root, BorderLayout.CENTER);
         this.frame.pack();
         SwingUtils.centerWindow(this.frame, 0);
         this.frame.setVisible(true);
