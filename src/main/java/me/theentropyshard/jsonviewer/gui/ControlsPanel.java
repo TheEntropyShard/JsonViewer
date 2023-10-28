@@ -16,6 +16,8 @@
 
 package me.theentropyshard.jsonviewer.gui;
 
+import me.theentropyshard.jsonviewer.JsonViewer;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -30,7 +32,7 @@ public class ControlsPanel extends JPanel {
     private final JComboBox<String> indentCombo;
     private final JButton minifyButton;
 
-    public ControlsPanel() {
+    public ControlsPanel(JsonViewer jsonViewer) {
         super(new BorderLayout());
 
         JPanel buttonsPanel = new JPanel(new GridLayout(0, 1, 0, 1));
@@ -58,6 +60,10 @@ public class ControlsPanel extends JPanel {
 
         this.indentCombo = new JComboBox<>(new String[]{"1 Space", "2 Space", "3 Space", "4 Space"});
         this.indentCombo.setPreferredSize(this.getDimension(this.indentCombo));
+
+        int indent = Integer.parseInt(jsonViewer.getConfig().getValue("beautifySpace", "3"));
+        this.indentCombo.setSelectedIndex(Math.min(3, Math.max(0, indent)));
+
         buttonsPanel.add(this.indentCombo);
 
         this.minifyButton = new JButton("Minify");

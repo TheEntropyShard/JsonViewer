@@ -65,7 +65,7 @@ public class MainView extends JPanel {
         this.titles = new HashMap<>();
         this.names = new HashMap<>();
 
-        this.controlsPanel = new ControlsPanel();
+        this.controlsPanel = new ControlsPanel(jsonViewer);
         this.controlsPanel.getFileButton().addActionListener(this::onFileButtonPressed);
         this.controlsPanel.getUrlButton().addActionListener(this::onUrlButtonPressed);
         this.controlsPanel.getTreeViewerButton().addActionListener(this::onTreeViewerButtonPressed);
