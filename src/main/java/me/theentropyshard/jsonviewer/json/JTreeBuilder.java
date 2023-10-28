@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package me.theentropyshard.jsonviewer;
+package me.theentropyshard.jsonviewer.json;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

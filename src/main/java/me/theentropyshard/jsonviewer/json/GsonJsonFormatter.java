@@ -14,32 +14,26 @@
  * limitations under the License.
  */
 
-package me.theentropyshard.jsonviewer;
+package me.theentropyshard.jsonviewer.json;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.StringWriter;
 
-public class JsonFormatter {
-    private static final Gson GSON = new GsonBuilder()
-            .disableHtmlEscaping()
-            .create();
-    private static final Gson PRETTY_GSON = JsonFormatter.GSON.newBuilder()
-            .setPrettyPrinting()
-            .create();
+public class GsonJsonFormatter implements JsonFormatter {
+    private final Gson gson;
+    private final Gson prettyGson;
 
-    public static boolean isJsonValid(String json) {
-        try {
-            JsonFormatter.GSON.fromJson(json, JsonElement.class);
-        } catch (JsonSyntaxException ignored) {
-            return false;
-        }
-
-        return true;
+    public GsonJsonFormatter() {
+        this.gson = new GsonBuilder()
+                .disableHtmlEscaping()
+                .create();
+        this.prettyGson = this.gson.newBuilder()
+                .setPrettyPrinting()
+                .create();
     }
 
     private static String getIndent(int indent) {
@@ -66,12 +60,13 @@ public class JsonFormatter {
         return builder.toString();
     }
 
-    public static String formatJson(String json, int indent) {
+    @Override
+    public String formatJson(String json, int indent) {
         try (StringWriter stringWriter = new StringWriter()) {
-            JsonWriter writer = JsonFormatter.PRETTY_GSON.newJsonWriter(stringWriter);
-            writer.setIndent(JsonFormatter.getIndent(indent));
-            JsonElement element = JsonFormatter.PRETTY_GSON.fromJson(json, JsonElement.class);
-            JsonFormatter.PRETTY_GSON.toJson(element, writer);
+            JsonWriter writer = this.prettyGson.newJsonWriter(stringWriter);
+            writer.setIndent(GsonJsonFormatter.getIndent(indent));
+            JsonElement element = this.prettyGson.fromJson(json, JsonElement.class);
+            this.prettyGson.toJson(element, writer);
             return stringWriter.toString();
         } catch (Exception e) {
             e.printStackTrace();
@@ -79,7 +74,8 @@ public class JsonFormatter {
         }
     }
 
-    public static String minifyJson(String json) {
-        return JsonFormatter.GSON.toJson(JsonFormatter.GSON.fromJson(json, JsonElement.class));
+    @Override
+    public String minifyJson(String json) {
+        return this.gson.toJson(this.gson.fromJson(json, JsonElement.class));
     }
 }

@@ -20,12 +20,11 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.FlatIntelliJLaf;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import me.theentropyshard.jsonviewer.JTreeBuilder;
-import me.theentropyshard.jsonviewer.JsonFormatter;
 import me.theentropyshard.jsonviewer.JsonViewer;
-import me.theentropyshard.jsonviewer.utils.Utils;
 import me.theentropyshard.jsonviewer.exception.NonJsonContentTypeException;
+import me.theentropyshard.jsonviewer.json.*;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
+import me.theentropyshard.jsonviewer.utils.Utils;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -44,6 +43,8 @@ import java.util.function.IntConsumer;
 public class Gui {
     public static final int BUTTON_HEIGHT = 35;
 
+    private final JsonService jsonService;
+
     private final JFrame frame;
     private final JTabbedPane views;
 
@@ -54,6 +55,8 @@ public class Gui {
 
     public Gui(JsonViewer jsonViewer) {
         this.initGui();
+
+        this.jsonService = jsonViewer.getJsonService();
 
         this.titles = new HashMap<>();
         this.names = new HashMap<>();
@@ -144,7 +147,7 @@ public class Gui {
             JsonView view = this.getCurrentView();
             String text = view.getText();
 
-            if (!JsonFormatter.isJsonValid(text)) {
+            if (!this.jsonService.isJsonValid(text)) {
                 JOptionPane.showMessageDialog(this.frame, "JSON is not valid", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -152,7 +155,7 @@ public class Gui {
             switch (e.getActionCommand()) {
                 case "beautify":
                     view.switchToTextView();
-                    String beautyText = JsonFormatter.formatJson(text, comp.getSelectedIndex() + 1);
+                    String beautyText = this.jsonService.formatJson(text, comp.getSelectedIndex() + 1);
 
                     if (beautyText == null) {
                         return;
@@ -164,7 +167,7 @@ public class Gui {
                     break;
                 case "minify":
                     view.switchToTextView();
-                    String minifiedText = JsonFormatter.minifyJson(text);
+                    String minifiedText = this.jsonService.minifyJson(text);
                     int size = minifiedText.getBytes(StandardCharsets.UTF_8).length;
                     view.setSizeInKBs(Utils.round(size / 1000.0, 2));
                     view.setText(minifiedText);

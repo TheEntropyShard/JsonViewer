@@ -18,12 +18,16 @@ package me.theentropyshard.jsonviewer;
 
 import me.theentropyshard.jsonviewer.config.Config;
 import me.theentropyshard.jsonviewer.gui.Gui;
+import me.theentropyshard.jsonviewer.json.GsonJsonFormatter;
+import me.theentropyshard.jsonviewer.json.GsonJsonValidator;
+import me.theentropyshard.jsonviewer.json.JsonService;
 
 import java.io.IOException;
 import java.nio.file.Paths;
 
 public class JsonViewer {
     private final Config config;
+    private final JsonService jsonService;
 
     public JsonViewer() {
         this.config = new Config(Paths.get(System.getProperty("user.home"), "JsonViewer.json"));
@@ -35,6 +39,8 @@ public class JsonViewer {
             e.printStackTrace();
         }
 
+        this.jsonService = new JsonService(new GsonJsonFormatter(), new GsonJsonValidator());
+
         new Gui(this);
     }
 
@@ -44,5 +50,9 @@ public class JsonViewer {
 
     public Config getConfig() {
         return this.config;
+    }
+
+    public JsonService getJsonService() {
+        return this.jsonService;
     }
 }
