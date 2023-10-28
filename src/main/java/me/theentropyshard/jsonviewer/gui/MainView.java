@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
@@ -98,6 +99,28 @@ public class MainView extends JPanel {
         return (JsonView) this.viewSelector.getComponentAt(selectedIndex);
     }
 
+    public void addRecentUrl(String url) {
+        List<String> recentUrls = this.jsonViewer.getConfig().getRecentUrls();
+
+        if (recentUrls.contains(url)) {
+            return;
+        }
+
+        recentUrls.add(url);
+        this.gui.addRecentUrl(url);
+    }
+
+    public void addRecentFile(String path) {
+        List<String> recentFiles = this.jsonViewer.getConfig().getRecentFiles();
+
+        if (recentFiles.contains(path)) {
+            return;
+        }
+
+        recentFiles.add(path);
+        this.gui.addRecentFile(path);
+    }
+
     public void newTab() {
         JsonView jsonView = new JsonView();
         this.viewSelector.addTab(null, jsonView);
@@ -151,6 +174,63 @@ public class MainView extends JPanel {
         );
     }
 
+    public void getFromUrl(String url) {
+        if (url.isEmpty()) {
+            return;
+        }
+
+        if (Utils.isUrlInvalid(url)) {
+            Gui.showErrorDialog("Invalid URL: " + url);
+            return;
+        }
+
+        String urlText = "[]";
+        try {
+            urlText = Utils.readURL(url);
+        } catch (NonJsonContentTypeException ex) {
+            Gui.showErrorDialog("Expected JSON, but got " + ex.getMessage());
+        } catch (IOException ex) {
+            Gui.showErrorDialog("Unable to load JSON from URL");
+            ex.printStackTrace();
+        }
+
+        if (!this.jsonService.isJsonValid(urlText)) {
+            Gui.showErrorDialog("Got invalid JSON from Url. Check console.");
+            System.err.println(urlText);
+            return;
+        }
+
+        this.addRecentUrl(url);
+
+        JsonView view = this.getCurrentView();
+
+        this.setJsonText(urlText);
+        this.names.get(view).setText(Utils.getLastPathComponent(url));
+    }
+
+    public void getFromFile(File file) {
+        String fileText = "[]";
+        try {
+            fileText = Utils.readFile(file);
+        } catch (IOException ex) {
+            Gui.showErrorDialog("Unable to load JSON from File");
+            ex.printStackTrace();
+        }
+
+        if (!this.jsonService.isJsonValid(fileText)) {
+            Gui.showErrorDialog("Got invalid JSON from File. Check console.");
+            System.err.println(fileText);
+            return;
+        }
+
+        this.addRecentFile(file.getAbsolutePath());
+
+        JsonView view = this.getCurrentView();
+
+        this.setJsonText(fileText);
+        this.names.get(view).setText(file.getName());
+    }
+
     private void setJsonText(String json) {
         JsonView view = this.getCurrentView();
 
@@ -163,8 +243,6 @@ public class MainView extends JPanel {
 
     private void onFileButtonPressed(ActionEvent e) {
         SwingUtils.startWorker(() -> {
-            JsonView view = this.getCurrentView();
-
             JFileChooser fileChooser = new JFileChooser(System.getProperty("user.dir"));
             fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files (*.json)", "json"));
 
@@ -177,57 +255,15 @@ public class MainView extends JPanel {
                 return;
             }
 
-            String fileText = "[]";
-            try {
-                fileText = Utils.readFile(selectedFile);
-            } catch (IOException ex) {
-                Gui.showErrorDialog("Unable to load JSON from File");
-                ex.printStackTrace();
-            }
-
-            if (!this.jsonService.isJsonValid(fileText)) {
-                Gui.showErrorDialog("Got invalid JSON from File. Check console.");
-                System.err.println(fileText);
-                return;
-            }
-
-            this.setJsonText(fileText);
-            this.names.get(view).setText(selectedFile.getName());
+            this.getFromFile(selectedFile);
         });
     }
 
     private void onUrlButtonPressed(ActionEvent e) {
         SwingUtils.startWorker(() -> {
-            JsonView view = this.getCurrentView();
-
             String input = Gui.showInputDialog("Enter the URL", "Url");
-            if (input.isEmpty()) {
-                return;
-            }
 
-            if (Utils.isUrlInvalid(input)) {
-                Gui.showErrorDialog("Invalid URL: " + input);
-                return;
-            }
-
-            String urlText = "[]";
-            try {
-                urlText = Utils.readURL(input);
-            } catch (NonJsonContentTypeException ex) {
-                Gui.showErrorDialog("Expected JSON, but got " + ex.getMessage());
-            } catch (IOException ex) {
-                Gui.showErrorDialog("Unable to load JSON from URL");
-                ex.printStackTrace();
-            }
-
-            if (!this.jsonService.isJsonValid(urlText)) {
-                Gui.showErrorDialog("Got invalid JSON from Url. Check console.");
-                System.err.println(urlText);
-                return;
-            }
-
-            this.setJsonText(urlText);
-            this.names.get(view).setText(Utils.getLastPathComponent(input));
+            this.getFromUrl(input);
         });
     }
 
@@ -283,7 +319,7 @@ public class MainView extends JPanel {
         }
 
         int selectedIndex = this.controlsPanel.getIndentCombo().getSelectedIndex();
-        this.jsonViewer.getConfig().setValue("beautifySpace", String.valueOf(selectedIndex));
+        this.jsonViewer.getConfig().setBeautifyIndent(selectedIndex);
 
         JsonView view = this.getCurrentView();
         String text = view.getText();

@@ -18,68 +18,51 @@ package me.theentropyshard.jsonviewer.config;
 
 import com.google.gson.Gson;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Config {
-    private final Path file;
-    private final Gson gson;
-    private final Map<String, String> data;
+    private int beautifyIndent = 3;
+    private List<String> recentUrls = new ArrayList<>();
+    private List<String> recentFiles = new ArrayList<>();
 
-    public Config(Path file) {
-        this.file = file;
-        this.gson = new Gson();
-        this.data = new HashMap<>();
+    public Config() {
+
     }
 
-    public String getValue(String key) {
-        return this.data.get(key);
+    public static Config load(Path file) throws IOException {
+        return new Gson().fromJson(Files.newBufferedReader(file, StandardCharsets.UTF_8), Config.class);
     }
 
-    public String getValue(String key, String def) {
-        String value = this.getValue(key);
-        if (value == null) {
-            return def;
-        } else {
-            return value;
-        }
+    public static void save(Path file, Config config) throws IOException {
+        Files.write(file, new Gson().toJson(config).getBytes(StandardCharsets.UTF_8));
     }
 
-    public void setValue(String key, String value) {
-        this.data.put(key, value);
+    public int getBeautifyIndent() {
+        return this.beautifyIndent;
     }
 
-    private void prepareFile() throws IOException {
-        Files.createDirectories(this.file.getParent());
-        if (!Files.exists(this.file)) {
-            Files.createFile(this.file);
-        }
+    public void setBeautifyIndent(int beautifyIndent) {
+        this.beautifyIndent = beautifyIndent;
     }
 
-    public void load() throws IOException {
-        this.prepareFile();
-        this.clear();
-
-        BufferedReader reader = Files.newBufferedReader(this.file, StandardCharsets.UTF_8);
-        @SuppressWarnings("unchecked")
-        Map<String, String> data = this.gson.fromJson(reader, Map.class);
-        if (data == null) {
-            return;
-        }
-        this.data.putAll(data);
+    public List<String> getRecentUrls() {
+        return this.recentUrls;
     }
 
-    public void save() throws IOException {
-        this.prepareFile();
-        Files.write(this.file, this.gson.toJson(this.data).getBytes(StandardCharsets.UTF_8));
+    public void setRecentUrls(List<String> recentUrls) {
+        this.recentUrls = recentUrls;
     }
 
-    public void clear() {
-        this.data.clear();
+    public List<String> getRecentFiles() {
+        return this.recentFiles;
+    }
+
+    public void setRecentFiles(List<String> recentFiles) {
+        this.recentFiles = recentFiles;
     }
 }

@@ -21,18 +21,21 @@ import me.theentropyshard.jsonviewer.config.Config;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class SaveConfigListener extends WindowAdapter {
+    private final Path savePath;
     private final Config config;
 
-    public SaveConfigListener(Config config) {
+    public SaveConfigListener(Path savePath, Config config) {
+        this.savePath = savePath;
         this.config = config;
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
         try {
-            this.config.save();
+            Config.save(this.savePath, this.config);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

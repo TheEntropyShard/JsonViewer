@@ -23,23 +23,35 @@ import me.theentropyshard.jsonviewer.json.GsonJsonValidator;
 import me.theentropyshard.jsonviewer.json.JsonService;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class JsonViewer {
-    private final Config config;
     private final JsonService jsonService;
+    private final Path configSavePath;
+
+    private Config config;
 
     public JsonViewer() {
-        this.config = new Config(Paths.get(System.getProperty("user.home"), "JsonViewer.json"));
+        this.configSavePath = Paths.get(System.getProperty("user.home"), "JsonViewer.json");
 
         try {
-            this.config.load();
+            this.config = Config.load(this.configSavePath);
         } catch (IOException e) {
             System.err.println("Unable to load config");
             e.printStackTrace();
+            this.config = new Config();
         }
 
         this.jsonService = new JsonService(new GsonJsonFormatter(), new GsonJsonValidator());
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Config.save(this.configSavePath, this.config);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }));
 
         new Gui(this);
     }
@@ -54,5 +66,9 @@ public class JsonViewer {
 
     public JsonService getJsonService() {
         return this.jsonService;
+    }
+
+    public Path getConfigSavePath() {
+        return this.configSavePath;
     }
 }

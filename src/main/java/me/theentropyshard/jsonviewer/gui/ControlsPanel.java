@@ -61,7 +61,7 @@ public class ControlsPanel extends JPanel {
         this.indentCombo = new JComboBox<>(new String[]{"1 Space", "2 Space", "3 Space", "4 Space"});
         this.indentCombo.setPreferredSize(this.getDimension(this.indentCombo));
 
-        int indent = Integer.parseInt(jsonViewer.getConfig().getValue("beautifySpace", "3"));
+        int indent = jsonViewer.getConfig().getBeautifyIndent();
         this.indentCombo.setSelectedIndex(Math.min(3, Math.max(0, indent)));
 
         buttonsPanel.add(this.indentCombo);
