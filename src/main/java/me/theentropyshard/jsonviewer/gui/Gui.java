@@ -7,6 +7,8 @@ import me.theentropyshard.jsonviewer.utils.SwingUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 
 public class Gui {
@@ -116,12 +118,33 @@ public class Gui {
         this.recentFilesMenu.add(urlItem);
     }
 
+    public void removeRecentFile(String absolutePath) {
+        MenuElement[] subElements = this.recentFilesMenu.getSubElements();
+        for (MenuElement menuElement : subElements) {
+            JPopupMenu popupMenu = (JPopupMenu) menuElement;
+            MenuElement[] popupElements = popupMenu.getSubElements();
+            for (MenuElement popupElement : popupElements) {
+                JMenuItem menuItem = (JMenuItem) popupElement;
+                if (menuItem.getText().equals(absolutePath)) {
+                    this.recentFilesMenu.remove(menuItem);
+                }
+            }
+        }
+    }
+
     public static void showErrorDialog(String message) {
         JOptionPane.showMessageDialog(Gui.instance.getFrame(), message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
     public static String showInputDialog(String message, String title) {
         return JOptionPane.showInputDialog(Gui.instance.getFrame(), message, title, JOptionPane.PLAIN_MESSAGE);
+    }
+
+    public static boolean showConfirmDialog(String message, String title) {
+        int option = JOptionPane.showConfirmDialog(Gui.instance.getFrame(), message, title, JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        return option == JOptionPane.OK_OPTION;
     }
 
     public JFrame getFrame() {

@@ -209,6 +209,17 @@ public class MainView extends JPanel {
     }
 
     public void getFromFile(File file) {
+        if (!file.exists()) {
+            boolean remove = Gui.showConfirmDialog("File '" + file.getAbsolutePath() +
+                            " does not exist. Remove from recent files?", "File does not exist");
+            if (remove) {
+                this.jsonViewer.getConfig().getRecentFiles().remove(file.getAbsolutePath());
+                this.gui.removeRecentFile(file.getAbsolutePath());
+            }
+
+            return;
+        }
+
         String fileText = "[]";
         try {
             fileText = Utils.readFile(file);
