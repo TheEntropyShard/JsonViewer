@@ -71,9 +71,10 @@ public class JsonTextView extends RTextScrollPane {
                 for (DataFlavor flavor : flavors) {
                     try {
                         if (flavor.isFlavorJavaFileListType()) {
+                            @SuppressWarnings("unchecked")
                             List<File> files = (List<File>) transferable.getTransferData(flavor);
                             for (File file : files) {
-                                mainView.addTab(file);
+                                JsonTextView.this.mainView.addTab(file);
                             }
                         }
                     } catch (Exception e) {

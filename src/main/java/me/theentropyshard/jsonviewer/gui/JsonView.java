@@ -42,7 +42,7 @@ public class JsonView extends JPanel {
         this.textView = new JsonTextView(mainView);
         this.view.add(this.textView, "textView");
 
-        this.treeView = new JsonTreeView();
+        this.treeView = new JsonTreeView(mainView);
         this.view.add(this.treeView, "treeView");
 
         this.add(this.view, BorderLayout.CENTER);
