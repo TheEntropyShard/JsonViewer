@@ -37,6 +37,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -121,8 +122,18 @@ public class MainView extends JPanel {
         this.gui.addRecentFile(path);
     }
 
-    public void newTab() {
-        JsonView jsonView = new JsonView();
+    public void addTab(File file) {
+        JsonView view = this.newTab();
+        this.getFromFile(file, view);
+    }
+
+    public void addTab(String url) {
+        JsonView view = this.newTab();
+        this.getFromUrl(url, view);
+    }
+
+    public JsonView newTab() {
+        JsonView jsonView = new JsonView(this);
         this.viewSelector.addTab(null, jsonView);
 
         JLabel tabTitle = new JLabel("Tab " + ++this.tabCounter);
@@ -172,9 +183,11 @@ public class MainView extends JPanel {
                 this.viewSelector.indexOfComponent(jsonView),
                 new JLayer<>(tabComponent, new DispatchEventLayerUI())
         );
+
+        return jsonView;
     }
 
-    public void getFromUrl(String url) {
+    public void getFromUrl(String url, JsonView view) {
         if (url.isEmpty()) {
             return;
         }
@@ -202,13 +215,15 @@ public class MainView extends JPanel {
 
         this.addRecentUrl(url);
 
-        JsonView view = this.getCurrentView();
+        if (view == null) {
+            view = this.getCurrentView();
+        }
 
-        this.setJsonText(urlText);
+        this.setJsonText(urlText, view);
         this.names.get(view).setText(Utils.getLastPathComponent(url));
     }
 
-    public void getFromFile(File file) {
+    public void getFromFile(File file, JsonView view) {
         if (!file.exists()) {
             boolean remove = Gui.showConfirmDialog("File '" + file.getAbsolutePath() +
                             " does not exist. Remove from recent files?", "File does not exist");
@@ -236,14 +251,18 @@ public class MainView extends JPanel {
 
         this.addRecentFile(file.getAbsolutePath());
 
-        JsonView view = this.getCurrentView();
+        if (view == null) {
+            view = this.getCurrentView();
+        }
 
-        this.setJsonText(fileText);
+        this.setJsonText(fileText, view);
         this.names.get(view).setText(file.getName());
     }
 
-    private void setJsonText(String json) {
-        JsonView view = this.getCurrentView();
+    private void setJsonText(String json, JsonView view) {
+        if (view == null) {
+            view = this.getCurrentView();
+        }
 
         int tSize = json.getBytes(StandardCharsets.UTF_8).length;
         view.setSizeInKBs(Utils.round(tSize / 1000.0, 2));
@@ -266,7 +285,7 @@ public class MainView extends JPanel {
                 return;
             }
 
-            this.getFromFile(selectedFile);
+            this.getFromFile(selectedFile, null);
         });
     }
 
@@ -274,7 +293,7 @@ public class MainView extends JPanel {
         SwingUtils.startWorker(() -> {
             String input = Gui.showInputDialog("Enter the URL", "Url");
 
-            this.getFromUrl(input);
+            this.getFromUrl(input, null);
         });
     }
 
@@ -321,7 +340,7 @@ public class MainView extends JPanel {
 
         int selectedIndex = this.controlsPanel.getIndentCombo().getSelectedIndex();
         String formattedJson = this.jsonService.formatJson(text, selectedIndex + 1);
-        this.setJsonText(formattedJson);
+        this.setJsonText(formattedJson, view);
     }
 
     private void onIndentComboSelected(ItemEvent e) {
@@ -341,7 +360,7 @@ public class MainView extends JPanel {
             return;
         }
 
-        this.setJsonText(this.jsonService.formatJson(text, selectedIndex + 1));
+        this.setJsonText(this.jsonService.formatJson(text, selectedIndex + 1), view);
     }
 
     private void onMinifyButtonPressed(ActionEvent e) {
@@ -357,6 +376,6 @@ public class MainView extends JPanel {
         }
 
         String minifiedJson = this.jsonService.minifyJson(text);
-        this.setJsonText(minifiedJson);
+        this.setJsonText(minifiedJson, view);
     }
 }

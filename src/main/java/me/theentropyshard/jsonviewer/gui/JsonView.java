@@ -33,13 +33,13 @@ public class JsonView extends JPanel {
     private final JLabel columnLabel;
     private final JLabel sizeLabel;
 
-    public JsonView() {
+    public JsonView(MainView mainView) {
         super(new BorderLayout());
 
         this.cardLayout = new CardLayout();
         this.view = new JPanel(this.cardLayout);
 
-        this.textView = new JsonTextView();
+        this.textView = new JsonTextView(mainView);
         this.view.add(this.textView, "textView");
 
         this.treeView = new JsonTreeView();

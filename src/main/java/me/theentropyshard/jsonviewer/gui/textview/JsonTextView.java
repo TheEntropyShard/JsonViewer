@@ -16,20 +16,29 @@
 
 package me.theentropyshard.jsonviewer.gui.textview;
 
+import me.theentropyshard.jsonviewer.gui.MainView;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import java.awt.*;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.Transferable;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDropEvent;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class JsonTextView extends RTextScrollPane {
+    private final MainView mainView;
     private final List<CaretUpdateListener> caretListeners;
     private final RSyntaxTextArea textArea;
 
-    public JsonTextView() {
+    public JsonTextView(MainView mainView) {
+        this.mainView = mainView;
         this.caretListeners = new ArrayList<>();
         this.textArea = this.makeTextArea();
         this.setViewportView(this.textArea);
@@ -52,6 +61,29 @@ public class JsonTextView extends RTextScrollPane {
         textArea.revalidate();
 
         textArea.addCaretListener(new TheCaretListener(textArea, this.caretListeners));
+
+        textArea.setDropTarget(new DropTarget() {
+            @Override
+            public void drop(DropTargetDropEvent event) {
+                event.acceptDrop(DnDConstants.ACTION_COPY);
+                Transferable transferable = event.getTransferable();
+                DataFlavor[] flavors = transferable.getTransferDataFlavors();
+                for (DataFlavor flavor : flavors) {
+                    try {
+                        if (flavor.isFlavorJavaFileListType()) {
+                            List<File> files = (List<File>) transferable.getTransferData(flavor);
+                            for (File file : files) {
+                                mainView.addTab(file);
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                event.dropComplete(true);
+            }
+        });
 
         return textArea;
     }

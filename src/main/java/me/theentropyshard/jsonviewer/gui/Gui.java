@@ -72,7 +72,7 @@ public class Gui {
 
             for (String url : recentUrls) {
                 JMenuItem urlItem = new JMenuItem(url);
-                urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url)));
+                urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
 
                 this.recentUrlsMenu.add(urlItem);
             }
@@ -93,7 +93,7 @@ public class Gui {
 
             for (String path : recentFiles) {
                 JMenuItem urlItem = new JMenuItem(path);
-                urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path))));
+                urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
 
                 this.recentFilesMenu.add(urlItem);
             }
@@ -106,14 +106,14 @@ public class Gui {
 
     public void addRecentUrl(String url) {
         JMenuItem urlItem = new JMenuItem(url);
-        urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url)));
+        urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
 
         this.recentUrlsMenu.add(urlItem);
     }
 
     public void addRecentFile(String path) {
         JMenuItem urlItem = new JMenuItem(path);
-        urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path))));
+        urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
 
         this.recentFilesMenu.add(urlItem);
     }
