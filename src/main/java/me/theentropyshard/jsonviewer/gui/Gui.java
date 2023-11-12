@@ -7,8 +7,6 @@ import me.theentropyshard.jsonviewer.utils.SwingUtils;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 import java.util.List;
 
 public class Gui {

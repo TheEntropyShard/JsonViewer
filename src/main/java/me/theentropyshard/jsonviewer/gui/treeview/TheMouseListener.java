@@ -16,9 +16,15 @@
 
 package me.theentropyshard.jsonviewer.gui.treeview;
 
+import com.google.gson.JsonElement;
+import me.theentropyshard.jsonviewer.json.JsonPair;
+
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Enumeration;
@@ -69,13 +75,40 @@ final class TheMouseListener extends MouseAdapter {
 
         JPopupMenu popup = new JPopupMenu();
 
-        JMenuItem expandItem = new JMenuItem("Expand");
-        expandItem.addActionListener(ae -> this.expandAllChildren(this.jsonTree, this.jsonTree.getSelectionPath(), true));
-        popup.add(expandItem);
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) path.getPathComponent(path.getPathCount() - 1);
+        if (node.getChildCount() == 0) {
+            @SuppressWarnings("unchecked")
+            JsonPair<String, JsonElement> pair = (JsonPair<String, JsonElement>) node.getUserObject();
 
-        JMenuItem collapseItem = new JMenuItem("Collapse");
-        collapseItem.addActionListener(ae -> this.expandAllChildren(this.jsonTree, this.jsonTree.getSelectionPath(), false));
-        popup.add(collapseItem);
+            JMenuItem expandItem = new JMenuItem("Copy Key");
+            expandItem.addActionListener(ae -> {
+                StringSelection selection = new StringSelection(pair.getLeft());
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+            });
+            popup.add(expandItem);
+
+            JMenuItem collapseItem = new JMenuItem("Copy Value");
+            collapseItem.addActionListener(ae -> {
+                StringSelection selection = new StringSelection(pair.getRight().getAsString());
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+            });
+            popup.add(collapseItem);
+        } else {
+            JMenuItem expandItem = new JMenuItem("Expand");
+            expandItem.addActionListener(ae -> this.expandAllChildren(this.jsonTree, this.jsonTree.getSelectionPath(), true));
+            popup.add(expandItem);
+
+            JMenuItem collapseItem = new JMenuItem("Collapse");
+            collapseItem.addActionListener(ae -> this.expandAllChildren(this.jsonTree, this.jsonTree.getSelectionPath(), false));
+            popup.add(collapseItem);
+
+            JMenuItem copyTextItem = new JMenuItem("Copy Text");
+            copyTextItem.addActionListener(ae -> {
+                StringSelection selection = new StringSelection(String.valueOf(node.getUserObject()));
+                Toolkit.getDefaultToolkit().getSystemClipboard().setContents(selection, selection);
+            });
+            popup.add(copyTextItem);
+        }
 
         popup.show(tree, x, y);
     }

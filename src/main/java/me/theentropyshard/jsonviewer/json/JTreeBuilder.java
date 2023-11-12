@@ -47,7 +47,7 @@ public class JTreeBuilder {
             for (Map.Entry<String, JsonElement> entry : map.entrySet()) {
                 JsonElement value = entry.getValue();
                 if (value.isJsonPrimitive()) {
-                    treeNode.add(new DefaultMutableTreeNode(entry.getKey() + ": " + value));
+                    treeNode.add(new DefaultMutableTreeNode(new JsonPair<>(entry.getKey(), value)));
                 } else {
                     String nodeName = entry.getKey();
                     if (value.isJsonArray()) {
