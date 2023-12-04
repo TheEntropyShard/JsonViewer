@@ -16,11 +16,10 @@
 
 package me.theentropyshard.jsonviewer.config;
 
-import com.google.gson.Gson;
+import me.theentropyshard.jsonviewer.utils.IOUtils;
+import me.theentropyshard.jsonviewer.utils.Json;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,11 +34,11 @@ public class Config {
     }
 
     public static Config load(Path file) throws IOException {
-        return new Gson().fromJson(Files.newBufferedReader(file, StandardCharsets.UTF_8), Config.class);
+        return Json.parse(IOUtils.readUtf8String(file), Config.class);
     }
 
     public static void save(Path file, Config config) throws IOException {
-        Files.write(file, new Gson().toJson(config).getBytes(StandardCharsets.UTF_8));
+        IOUtils.writeUtf8String(file, Json.write(config));
     }
 
     public int getBeautifyIndent() {
