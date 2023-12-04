@@ -41,10 +41,6 @@ final class DispatchEventLayerUI extends LayerUI<JPanel> {
 
     @Override
     protected void processMouseEvent(MouseEvent e, JLayer<? extends JPanel> l) {
-        this.dispatchEvent(e);
-    }
-
-    private void dispatchEvent(MouseEvent e) {
         Component src = e.getComponent();
         Container tgt = SwingUtilities.getAncestorOfClass(JTabbedPane.class, src);
         tgt.dispatchEvent(SwingUtilities.convertMouseEvent(src, e, tgt));

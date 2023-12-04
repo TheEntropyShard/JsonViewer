@@ -42,7 +42,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
@@ -255,7 +254,7 @@ public class MainView extends JPanel {
     public void getFromFile(File file, JsonView view) {
         if (!file.exists()) {
             boolean remove = Gui.showConfirmDialog("File '" + file.getAbsolutePath() +
-                            " does not exist. Remove from recent files?", "File does not exist");
+                    " does not exist. Remove from recent files?", "File does not exist");
             if (remove) {
                 this.jsonViewer.getConfig().getRecentFiles().remove(file.getAbsolutePath());
                 this.gui.removeRecentFile(file.getAbsolutePath());
@@ -356,14 +355,22 @@ public class MainView extends JPanel {
         view.setModel(new DefaultTreeModel(JTreeBuilder.buildTree(name, rootElement)));
     }
 
+    private boolean invalidJson(String json) {
+        if (!this.jsonService.isJsonValid(json)) {
+            Gui.showErrorDialog("Got invalid JSON. Check console.");
+            System.err.println(json);
+            return true;
+        }
+
+        return false;
+    }
+
     private void onBeautifyButtonPressed(ActionEvent e) {
         JsonView view = this.getCurrentView();
         view.switchToTextView();
-
         String text = view.getText();
-        if (!this.jsonService.isJsonValid(text)) {
-            Gui.showErrorDialog("Got invalid JSON. Check console.");
-            System.err.println(text);
+
+        if (this.invalidJson(text)) {
             return;
         }
 
@@ -398,9 +405,7 @@ public class MainView extends JPanel {
 
         String text = view.getText();
 
-        if (!this.jsonService.isJsonValid(text)) {
-            Gui.showErrorDialog("Got invalid JSON. Check console.");
-            System.err.println(text);
+        if (this.invalidJson(text)) {
             return;
         }
 
