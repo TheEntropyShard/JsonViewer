@@ -45,6 +45,8 @@ public class JsonViewer {
 
         this.jsonService = new JsonService(new GsonJsonFormatter(), new GsonJsonValidator());
 
+        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2,TLSv1.3");
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 Config.save(this.configSavePath, this.config);
