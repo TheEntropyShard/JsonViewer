@@ -78,7 +78,17 @@ public class Utils {
     }
 
     public static String getLastPathComponent(String name) {
-        return name.substring(name.lastIndexOf("/") + 1);
+        String component = name.substring(name.lastIndexOf("/") + 1);
+
+        if (component.trim().isEmpty()) {
+            try {
+                return new URL(name).getHost();
+            } catch (MalformedURLException e) {
+                return name;
+            }
+        }
+
+        return component;
     }
 
     public static boolean isUrlInvalid(String url) {
