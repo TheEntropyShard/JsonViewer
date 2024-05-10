@@ -20,6 +20,7 @@ import me.theentropyshard.jsonviewer.gui.MainView;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
+import org.fife.ui.rtextarea.ExpandedFoldRenderStrategy;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
 import java.awt.*;
@@ -43,11 +44,14 @@ public class JsonTextView extends RTextScrollPane {
         this.textArea = this.makeTextArea();
         this.setViewportView(this.textArea);
         this.setLineNumbersEnabled(true);
+        this.setFoldIndicatorEnabled(true);
+        this.getGutter().setExpandedFoldRenderStrategy(ExpandedFoldRenderStrategy.ALWAYS);
     }
 
     private RSyntaxTextArea makeTextArea() {
         RSyntaxTextArea textArea = new RSyntaxTextArea();
         textArea.setLineWrap(true);
+        textArea.setCodeFoldingEnabled(true);
         textArea.setBracketMatchingEnabled(true);
         textArea.setShowMatchedBracketPopup(true);
         textArea.setSyntaxEditingStyle(RSyntaxTextArea.SYNTAX_STYLE_JSON);
