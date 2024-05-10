@@ -13,5 +13,5 @@ If your Maven home and OS information is displayed, it means you have installed 
 git clone https://github.com/TheEntropyShard/JsonViewer
 cd JsonViewer
 mvn clean package
-java -jar target/JsonViewer-0.7.2.jar
+java -jar target/JsonViewer-0.7.3.jar
 ```
