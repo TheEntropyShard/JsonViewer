@@ -31,11 +31,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.MouseAdapter;
@@ -97,29 +92,7 @@ public class MainView extends JPanel {
         this.add(this.viewSelector, BorderLayout.CENTER);
         this.add(this.controlsPanel, BorderLayout.WEST);
 
-        this.setDropTarget(new DropTarget() {
-            @Override
-            public void drop(DropTargetDropEvent event) {
-                event.acceptDrop(DnDConstants.ACTION_COPY);
-                Transferable transferable = event.getTransferable();
-                DataFlavor[] flavors = transferable.getTransferDataFlavors();
-                for (DataFlavor flavor : flavors) {
-                    try {
-                        if (flavor.isFlavorJavaFileListType()) {
-                            @SuppressWarnings("unchecked")
-                            List<File> files = (List<File>) transferable.getTransferData(flavor);
-                            for (File file : files) {
-                                MainView.this.addTab(file);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                event.dropComplete(true);
-            }
-        });
+        this.setDropTarget(new FileDropTarget(this::addTab));
     }
 
     public JsonView getCurrentView() {
