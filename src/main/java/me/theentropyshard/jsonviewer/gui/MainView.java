@@ -83,6 +83,10 @@ public class MainView extends JPanel {
         this.viewSelector.setBorder(new EmptyBorder(3, 0, 3, 3));
         this.viewSelector.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, Boolean.TRUE);
         this.viewSelector.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (IntConsumer) tab -> {
+            if (this.tabCounter == 1) {
+                return;
+            }
+
             this.tabCounter--;
             this.viewSelector.removeTabAt(tab);
         });
