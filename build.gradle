@@ -21,12 +21,20 @@ ext {
     flatlaf = '3.4.1'
     gson = '2.10.1'
     rsyntaxtextarea = '3.4.0'
+    junit = '5.7.2'
 }
 
 dependencies {
     implementation "com.formdev:flatlaf:$flatlaf"
     implementation "com.google.code.gson:gson:$gson"
     implementation "com.fifesoft:rsyntaxtextarea:$rsyntaxtextarea"
+
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit"
+    testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit"
+}
+
+test {
+    useJUnitPlatform()
 }
 
 java {
