@@ -37,10 +37,15 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.IntConsumer;
 
 public class MainView extends JPanel {
@@ -202,14 +207,33 @@ public class MainView extends JPanel {
             return;
         }
 
-        String urlText = "[]";
+        String urlText;
         try {
-            urlText = Utils.readURL(url);
-        } catch (NonJsonContentTypeException ex) {
-            Gui.showErrorDialog("Expected JSON, but got " + ex.getMessage());
-        } catch (IOException ex) {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .GET()
+                    .build();
+
+            HttpClient httpClient = this.jsonViewer.getHttpClient();
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+
+            Optional<String> optional = response.headers().firstValue("Content-Type");
+            if (optional.isPresent()) {
+                String contentType = optional.get();
+                if (!contentType.startsWith("application/json")) {
+                    Gui.showErrorDialog("Expected JSON, but got " + contentType);
+                    return;
+                } else {
+                    urlText = response.body();
+                }
+            } else {
+                Gui.showErrorDialog("Expected JSON, but got no Content-Type");
+                return;
+            }
+        } catch (IOException | InterruptedException ex) {
             Gui.showErrorDialog("Unable to load JSON from URL");
             ex.printStackTrace();
+            return;
         }
 
         if (!this.jsonService.isJsonValid(urlText)) {
