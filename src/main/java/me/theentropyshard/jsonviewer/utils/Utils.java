@@ -31,7 +31,9 @@ public class Utils {
     }
 
     public static String readFile(File file) throws IOException {
-        return Utils.inputStreamToString(Files.newInputStream(file.toPath()));
+        try (InputStream inputStream = Files.newInputStream(file.toPath())) {
+            return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
     }
 
     public static double round(double value, int places) {
@@ -41,22 +43,6 @@ public class Utils {
         value = value * factor;
         long tmp = Math.round(value);
         return (double) tmp / factor;
-    }
-
-    public static String inputStreamToString(InputStream inputStream) throws IOException {
-        if (!(inputStream instanceof BufferedInputStream)) {
-            inputStream = new BufferedInputStream(inputStream);
-        }
-
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[2048];
-            int numRead;
-            while ((numRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, numRead);
-            }
-
-            return outputStream.toString(StandardCharsets.UTF_8);
-        }
     }
 
     public static String getLastPathComponent(String name) {
