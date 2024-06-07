@@ -4,14 +4,10 @@ This is a simple local JSON viewer. It can load data from a URL or a File. Also,
 ![Screenshot](images/Screenshot.png)
 
 ### Quick start:
-First, make sure you have [Maven](https://maven.apache.org/) installed. To check it, run
-```shell
-mvn -v
-```
-If your Maven home and OS information is displayed, it means you have installed Maven correctly. Then run these commands:
+To build JsonViewer you need JDK 17. Run these commands:
 ```shell
 git clone https://github.com/TheEntropyShard/JsonViewer
 cd JsonViewer
-mvn clean package
-java -jar target/JsonViewer-0.7.3.jar
+gradlew shadowJar
+java -jar build/libs/JsonViewer-0.7.3.jar
 ```
