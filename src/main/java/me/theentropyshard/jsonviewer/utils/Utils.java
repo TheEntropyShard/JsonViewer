@@ -55,7 +55,7 @@ public class Utils {
                 outputStream.write(buffer, 0, numRead);
             }
 
-            return new String(outputStream.toByteArray(), StandardCharsets.UTF_8);
+            return outputStream.toString(StandardCharsets.UTF_8);
         }
     }
 
