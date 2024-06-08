@@ -34,13 +34,16 @@ public class FileDropTarget extends DropTarget {
     @Override
     public synchronized void drop(DropTargetDropEvent event) {
         event.acceptDrop(DnDConstants.ACTION_COPY);
+
         Transferable transferable = event.getTransferable();
         DataFlavor[] flavors = transferable.getTransferDataFlavors();
+
         for (DataFlavor flavor : flavors) {
             try {
                 if (flavor.isFlavorJavaFileListType()) {
                     @SuppressWarnings("unchecked")
                     List<File> files = (List<File>) transferable.getTransferData(flavor);
+
                     for (File file : files) {
                         this.listener.onFileDropped(file);
                     }

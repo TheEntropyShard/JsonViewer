@@ -16,19 +16,13 @@
 
 package me.theentropyshard.jsonviewer.gui.treeview;
 
+import me.theentropyshard.jsonviewer.gui.FileDropTarget;
 import me.theentropyshard.jsonviewer.gui.MainView;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetDropEvent;
-import java.io.File;
-import java.util.List;
 
 public class JsonTreeView extends JScrollPane {
     private final MainView mainView;
@@ -46,29 +40,7 @@ public class JsonTreeView extends JScrollPane {
         jsonTree.setRootVisible(true);
         jsonTree.addMouseListener(new TheMouseListener(jsonTree));
 
-        jsonTree.setDropTarget(new DropTarget() {
-            @Override
-            public void drop(DropTargetDropEvent event) {
-                event.acceptDrop(DnDConstants.ACTION_COPY);
-                Transferable transferable = event.getTransferable();
-                DataFlavor[] flavors = transferable.getTransferDataFlavors();
-                for (DataFlavor flavor : flavors) {
-                    try {
-                        if (flavor.isFlavorJavaFileListType()) {
-                            @SuppressWarnings("unchecked")
-                            List<File> files = (List<File>) transferable.getTransferData(flavor);
-                            for (File file : files) {
-                                JsonTreeView.this.mainView.addTab(file);
-                            }
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                event.dropComplete(true);
-            }
-        });
+        jsonTree.setDropTarget(new FileDropTarget(this.mainView::addTab));
 
         return jsonTree;
     }
