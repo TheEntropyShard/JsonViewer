@@ -19,6 +19,8 @@ package me.theentropyshard.jsonviewer.gui.treeview;
 import me.theentropyshard.jsonviewer.gui.MainView;
 
 import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -39,7 +41,7 @@ public class JsonTreeView extends JScrollPane {
     }
 
     private JTree makeJsonTree() {
-        JTree jsonTree = new JTree();
+        JTree jsonTree = new JTree(JsonTreeView.getEmptyTreeModel());
         jsonTree.setShowsRootHandles(true);
         jsonTree.setRootVisible(true);
         jsonTree.addMouseListener(new TheMouseListener(jsonTree));
@@ -69,6 +71,10 @@ public class JsonTreeView extends JScrollPane {
         });
 
         return jsonTree;
+    }
+
+    private static TreeModel getEmptyTreeModel() {
+        return new DefaultTreeModel(new DefaultMutableTreeNode("empty"));
     }
 
     public void setModel(TreeModel treeModel) {
