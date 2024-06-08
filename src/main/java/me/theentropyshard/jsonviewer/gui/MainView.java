@@ -369,7 +369,12 @@ public class MainView extends JPanel {
     private void onBeautifyButtonPressed(ActionEvent e) {
         JsonView view = this.getCurrentView();
         view.switchToTextView();
+
         String text = view.getText();
+
+        if (text.isEmpty()) {
+            return;
+        }
 
         if (this.invalidJson(text)) {
             return;
@@ -405,6 +410,10 @@ public class MainView extends JPanel {
         view.switchToTextView();
 
         String text = view.getText();
+
+        if (text.isEmpty()) {
+            return;
+        }
 
         if (this.invalidJson(text)) {
             return;
