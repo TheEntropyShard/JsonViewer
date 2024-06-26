@@ -22,7 +22,6 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import me.theentropyshard.jsonviewer.JsonViewer;
-import me.theentropyshard.jsonviewer.exception.NonJsonContentTypeException;
 import me.theentropyshard.jsonviewer.json.JTreeBuilder;
 import me.theentropyshard.jsonviewer.json.JsonService;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
