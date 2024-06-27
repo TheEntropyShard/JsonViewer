@@ -22,8 +22,10 @@ import com.formdev.flatlaf.FlatClientProperties;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import me.theentropyshard.jsonviewer.JsonViewer;
+import me.theentropyshard.jsonviewer.config.Config;
 import me.theentropyshard.jsonviewer.json.JTreeBuilder;
 import me.theentropyshard.jsonviewer.json.JsonService;
+import me.theentropyshard.jsonviewer.utils.MathUtils;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 import me.theentropyshard.jsonviewer.utils.Utils;
 
@@ -50,7 +52,8 @@ import java.util.Optional;
 import java.util.function.IntConsumer;
 
 public class MainView extends JPanel {
-    private final JsonViewer jsonViewer;
+    private final Config config;
+    private final HttpClient httpClient;
     private final JsonService jsonService;
     private final Gui gui;
 
@@ -62,11 +65,12 @@ public class MainView extends JPanel {
 
     private int tabCounter;
 
-    public MainView(JsonViewer jsonViewer, Gui gui) {
+    public MainView(Config config, HttpClient httpClient, JsonService jsonService, Gui gui) {
         super(new BorderLayout());
 
-        this.jsonViewer = jsonViewer;
-        this.jsonService = jsonViewer.getJsonService();
+        this.config = config;
+        this.httpClient = httpClient;
+        this.jsonService = jsonService;
         this.gui = gui;
 
         this.titles = new HashMap<>();
@@ -76,8 +80,7 @@ public class MainView extends JPanel {
                 this::onFileButtonPressed, this::onUrlButtonPressed, this::onTreeViewerButtonPressed,
                 this::onBeautifyButtonPressed, this::onIndentComboSelected, this::onMinifyButtonPressed
         );
-        int indent = jsonViewer.getConfig().getBeautifyIndent();
-        this.controlPanel.getIndentCombo().setSelectedIndex(Math.min(3, Math.max(0, indent)));
+        this.controlPanel.getIndentCombo().setSelectedIndex(MathUtils.clamp(0, 3, this.config.getBeautifyIndent()));
 
         this.viewSelector = new JTabbedPane(JTabbedPane.TOP);
         this.viewSelector.setBorder(new EmptyBorder(3, 0, 3, 3));
@@ -113,7 +116,7 @@ public class MainView extends JPanel {
     }
 
     public void addRecentUrl(String url) {
-        List<String> recentUrls = this.jsonViewer.getConfig().getRecentUrls();
+        List<String> recentUrls = this.config.getRecentUrls();
 
         if (recentUrls.contains(url)) {
             return;
@@ -124,7 +127,7 @@ public class MainView extends JPanel {
     }
 
     public void addRecentFile(String path) {
-        List<String> recentFiles = this.jsonViewer.getConfig().getRecentFiles();
+        List<String> recentFiles = this.config.getRecentFiles();
 
         if (recentFiles.contains(path)) {
             return;
@@ -216,8 +219,7 @@ public class MainView extends JPanel {
                     .GET()
                     .build();
 
-            HttpClient httpClient = this.jsonViewer.getHttpClient();
-            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
 
             Optional<String> optional = response.headers().firstValue("Content-Type");
             if (optional.isPresent()) {
@@ -238,9 +240,7 @@ public class MainView extends JPanel {
             return;
         }
 
-        if (!this.jsonService.isJsonValid(urlText)) {
-            Gui.showErrorDialog("Got invalid JSON from Url. Check console.");
-            System.err.println(urlText);
+        if (this.invalidJson(urlText)) {
             return;
         }
 
@@ -259,7 +259,7 @@ public class MainView extends JPanel {
             boolean remove = Gui.showConfirmDialog("File '" + file.getAbsolutePath() +
                     " does not exist. Remove from recent files?", "File does not exist");
             if (remove) {
-                this.jsonViewer.getConfig().getRecentFiles().remove(file.getAbsolutePath());
+                this.config.getRecentFiles().remove(file.getAbsolutePath());
                 this.gui.removeRecentFile(file.getAbsolutePath());
             }
 
@@ -274,9 +274,7 @@ public class MainView extends JPanel {
             ex.printStackTrace();
         }
 
-        if (!this.jsonService.isJsonValid(fileText)) {
-            Gui.showErrorDialog("Got invalid JSON from File. Check console.");
-            System.err.println(fileText);
+        if (this.invalidJson(fileText)) {
             return;
         }
 
@@ -332,9 +330,7 @@ public class MainView extends JPanel {
 
         String text = view.getText();
 
-        if (!this.jsonService.isJsonValid(text)) {
-            Gui.showErrorDialog("Got invalid JSON. Check console.");
-            System.err.println(text);
+        if (this.invalidJson(text)) {
             return;
         }
 
@@ -391,14 +387,12 @@ public class MainView extends JPanel {
         }
 
         int selectedIndex = this.controlPanel.getIndentCombo().getSelectedIndex();
-        this.jsonViewer.getConfig().setBeautifyIndent(selectedIndex);
+        this.config.setBeautifyIndent(selectedIndex);
 
         JsonView view = this.getCurrentView();
         String text = view.getText();
 
-        if (!this.jsonService.isJsonValid(text)) {
-            Gui.showErrorDialog("Got invalid JSON. Check console.");
-            System.err.println(text);
+        if (this.invalidJson(text)) {
             return;
         }
 

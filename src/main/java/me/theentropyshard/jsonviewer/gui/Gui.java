@@ -43,7 +43,7 @@ public class Gui {
 
         this.initGui();
 
-        this.mainView = new MainView(jsonViewer, this);
+        this.mainView = new MainView(jsonViewer.getConfig(), jsonViewer.getHttpClient(), jsonViewer.getJsonService(), this);
 
         this.frame = new JFrame("JsonViewer");
         this.frame.addWindowListener(new SaveConfigListener(jsonViewer.getConfigSavePath(), jsonViewer.getConfig()));

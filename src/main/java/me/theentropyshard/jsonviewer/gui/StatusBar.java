@@ -18,7 +18,7 @@
 
 package me.theentropyshard.jsonviewer.gui;
 
-import me.theentropyshard.jsonviewer.utils.Utils;
+import me.theentropyshard.jsonviewer.utils.MathUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,7 +42,7 @@ public class StatusBar extends JPanel {
         this.label.setText(
                 "Line: " + this.line + ", " +
                 "Column: " + this.column + ", " +
-                "Size: " + Utils.round(this.bytes / 1024.0, 2) + " KBs"
+                "Size: " + MathUtils.round(this.bytes / 1024.0, 2) + " KBs"
         );
     }
 
