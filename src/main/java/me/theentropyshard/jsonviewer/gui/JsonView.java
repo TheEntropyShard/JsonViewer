@@ -31,9 +31,7 @@ public class JsonView extends JPanel {
 
     private final CardLayout cardLayout;
     private final JPanel view;
-    private final JLabel lineLabel;
-    private final JLabel columnLabel;
-    private final JLabel sizeLabel;
+    private final StatusBar statusBar;
 
     public JsonView(MainView mainView) {
         super(new BorderLayout());
@@ -49,21 +47,15 @@ public class JsonView extends JPanel {
 
         this.add(this.view, BorderLayout.CENTER);
 
-        JPanel statusBar = new JPanel(new FlowLayout(FlowLayout.LEFT));
-
-        this.lineLabel = new JLabel("Line: 0,");
-        statusBar.add(this.lineLabel);
-        this.columnLabel = new JLabel("Column: 0,");
-        statusBar.add(this.columnLabel);
-        this.sizeLabel = new JLabel("Size: 0 KB");
-        statusBar.add(this.sizeLabel);
+        this.statusBar = new StatusBar();
 
         this.textView.addCaretUpdateListener((lineNumber, columnNumber) -> {
-            this.lineLabel.setText("Line: " + lineNumber + ",");
-            this.columnLabel.setText("Column: " + columnNumber + ",");
+            this.statusBar.setLine(lineNumber);
+            this.statusBar.setColumn(columnNumber);
+            this.statusBar.updateStatus();
         });
 
-        this.add(statusBar, BorderLayout.SOUTH);
+        this.add(this.statusBar, BorderLayout.SOUTH);
     }
 
     public void scrollToTop() {
@@ -90,7 +82,8 @@ public class JsonView extends JPanel {
         this.treeView.setModel(model);
     }
 
-    public void setSizeInKBs(double sizeInKBs) {
-        this.sizeLabel.setText("Size: " + sizeInKBs + " KB");
+    public void setSizeBytes(int bytes) {
+        this.statusBar.setBytes(bytes);
+        this.statusBar.updateStatus();
     }
 }

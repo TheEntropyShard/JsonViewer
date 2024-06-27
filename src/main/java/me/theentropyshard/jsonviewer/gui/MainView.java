@@ -294,9 +294,7 @@ public class MainView extends JPanel {
             view = this.getCurrentView();
         }
 
-        int tSize = json.getBytes(StandardCharsets.UTF_8).length;
-        view.setSizeInKBs(Utils.round(tSize / 1000.0, 2));
-
+        view.setSizeBytes(json.getBytes(StandardCharsets.UTF_8).length);
         view.setText(json);
         view.scrollToTop();
     }
