@@ -80,7 +80,6 @@ public class MainView extends JPanel {
                 this::onFileButtonPressed, this::onUrlButtonPressed, this::onTreeViewerButtonPressed,
                 this::onBeautifyButtonPressed, this::onIndentComboSelected, this::onMinifyButtonPressed
         );
-        this.controlPanel.getIndentCombo().setSelectedIndex(MathUtils.clamp(0, 3, this.config.getBeautifyIndent()));
 
         this.viewSelector = new JTabbedPane(JTabbedPane.TOP);
         this.viewSelector.setBorder(new EmptyBorder(3, 0, 3, 3));
@@ -97,6 +96,7 @@ public class MainView extends JPanel {
         });
 
         this.newTab();
+        this.controlPanel.getIndentCombo().setSelectedIndex(MathUtils.clamp(0, 3, this.config.getBeautifyIndent()));
 
         this.setPreferredSize(new Dimension(1088, 576));
         this.add(this.viewSelector, BorderLayout.CENTER);
@@ -353,6 +353,10 @@ public class MainView extends JPanel {
     }
 
     private boolean invalidJson(String json) {
+        if (json == null || json.isEmpty()) {
+            return true;
+        }
+
         if (!this.jsonService.isJsonValid(json)) {
             Gui.showErrorDialog("Got invalid JSON. Check console.");
             System.err.println(json);
