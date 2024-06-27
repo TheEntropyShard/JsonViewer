@@ -45,6 +45,10 @@ public class JsonTextView extends RTextScrollPane {
         this.getGutter().setExpandedFoldRenderStrategy(ExpandedFoldRenderStrategy.ALWAYS);
     }
 
+    public void clear() {
+        this.setText("");
+    }
+
     private RSyntaxTextArea makeTextArea() {
         RSyntaxTextArea textArea = new RSyntaxTextArea();
         textArea.setLineWrap(true);

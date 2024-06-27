@@ -58,6 +58,11 @@ public class JsonView extends JPanel {
         this.add(this.statusBar, BorderLayout.SOUTH);
     }
 
+    public void clear() {
+        this.textView.clear();
+        this.treeView.clear();
+    }
+
     public void scrollToTop() {
         this.textView.scrollToTop();
     }

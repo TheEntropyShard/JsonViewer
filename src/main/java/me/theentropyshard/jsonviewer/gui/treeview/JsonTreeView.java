@@ -36,6 +36,10 @@ public class JsonTreeView extends JScrollPane {
         this.setViewportView(this.jsonTree);
     }
 
+    public void clear() {
+        this.setModel(JsonTreeView.getEmptyTreeModel());
+    }
+
     private JTree makeJsonTree() {
         JTree jsonTree = new JTree(JsonTreeView.getEmptyTreeModel());
         jsonTree.setShowsRootHandles(true);
