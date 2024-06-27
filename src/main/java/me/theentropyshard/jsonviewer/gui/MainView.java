@@ -57,7 +57,7 @@ public class MainView extends JPanel {
     private final Map<JPanel, JLabel> titles;
     private final Map<JsonView, JLabel> names;
 
-    private final ControlsPanel controlsPanel;
+    private final ControlPanel controlPanel;
     private final JTabbedPane viewSelector;
 
     private int tabCounter;
@@ -72,13 +72,12 @@ public class MainView extends JPanel {
         this.titles = new HashMap<>();
         this.names = new HashMap<>();
 
-        this.controlsPanel = new ControlsPanel(jsonViewer);
-        this.controlsPanel.getFileButton().addActionListener(this::onFileButtonPressed);
-        this.controlsPanel.getUrlButton().addActionListener(this::onUrlButtonPressed);
-        this.controlsPanel.getTreeViewerButton().addActionListener(this::onTreeViewerButtonPressed);
-        this.controlsPanel.getBeautifyButton().addActionListener(this::onBeautifyButtonPressed);
-        this.controlsPanel.getIndentCombo().addItemListener(this::onIndentComboSelected);
-        this.controlsPanel.getMinifyButton().addActionListener(this::onMinifyButtonPressed);
+        this.controlPanel = new ControlPanel(
+                this::onFileButtonPressed, this::onUrlButtonPressed, this::onTreeViewerButtonPressed,
+                this::onBeautifyButtonPressed, this::onIndentComboSelected, this::onMinifyButtonPressed
+        );
+        int indent = jsonViewer.getConfig().getBeautifyIndent();
+        this.controlPanel.getIndentCombo().setSelectedIndex(Math.min(3, Math.max(0, indent)));
 
         this.viewSelector = new JTabbedPane(JTabbedPane.TOP);
         this.viewSelector.setBorder(new EmptyBorder(3, 0, 3, 3));
@@ -98,7 +97,7 @@ public class MainView extends JPanel {
 
         this.setPreferredSize(new Dimension(1088, 576));
         this.add(this.viewSelector, BorderLayout.CENTER);
-        this.add(this.controlsPanel, BorderLayout.WEST);
+        this.add(this.controlPanel, BorderLayout.WEST);
 
         this.setDropTarget(new FileDropTarget(this::addTab));
     }
@@ -381,7 +380,7 @@ public class MainView extends JPanel {
             return;
         }
 
-        int selectedIndex = this.controlsPanel.getIndentCombo().getSelectedIndex();
+        int selectedIndex = this.controlPanel.getIndentCombo().getSelectedIndex();
         String formattedJson = this.jsonService.formatJson(text, selectedIndex + 1);
         this.setJsonText(formattedJson, view);
     }
@@ -391,7 +390,7 @@ public class MainView extends JPanel {
             return;
         }
 
-        int selectedIndex = this.controlsPanel.getIndentCombo().getSelectedIndex();
+        int selectedIndex = this.controlPanel.getIndentCombo().getSelectedIndex();
         this.jsonViewer.getConfig().setBeautifyIndent(selectedIndex);
 
         JsonView view = this.getCurrentView();
