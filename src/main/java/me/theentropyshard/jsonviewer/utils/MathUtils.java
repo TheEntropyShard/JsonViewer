@@ -32,7 +32,7 @@ public final class MathUtils {
     }
 
     public static int clamp(int min, int max, int x) {
-        return Math.min(min, Math.max(max, x));
+        return Math.max(min, Math.min(max, x));
     }
 
     private MathUtils() {
