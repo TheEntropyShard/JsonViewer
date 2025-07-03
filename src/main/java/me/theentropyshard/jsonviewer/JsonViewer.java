@@ -49,7 +49,7 @@ public class JsonViewer {
 
         this.jsonService = new JsonService(new GsonJsonFormatter(), new GsonJsonValidator());
 
-        System.setProperty("https.protocols", "TLSv1,TLSv1.1,TLSv1.2,TLSv1.3");
+        System.setProperty("https.protocols", "TLSv1.2,TLSv1.3");
 
         this.httpClient = HttpClient.newHttpClient();
 

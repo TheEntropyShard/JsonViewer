@@ -19,13 +19,15 @@
 package me.theentropyshard.jsonviewer.gui;
 
 import com.formdev.flatlaf.FlatIntelliJLaf;
-import me.theentropyshard.jsonviewer.JsonViewer;
-import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Files;
 import java.util.List;
+
+import me.theentropyshard.jsonviewer.JsonViewer;
+import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 public class Gui {
     private static Gui instance;
@@ -100,19 +102,11 @@ public class Gui {
 
         List<String> recentFiles = this.jsonViewer.getConfig().getRecentFiles();
 
-        if (!recentFiles.isEmpty()) {
-            if (recentFiles.size() < 10) {
-                recentFiles = recentFiles.subList(0, recentFiles.size());
-            } else {
-                recentFiles = recentFiles.subList(0, 10);
-            }
+        for (String path : recentFiles) {
+            JMenuItem urlItem = new JMenuItem(path);
+            urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
 
-            for (String path : recentFiles) {
-                JMenuItem urlItem = new JMenuItem(path);
-                urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
-
-                this.recentFilesMenu.add(urlItem);
-            }
+            this.recentFilesMenu.add(urlItem);
         }
 
         fileMenu.add(this.recentFilesMenu);
@@ -158,7 +152,7 @@ public class Gui {
 
     public static boolean showConfirmDialog(String message, String title) {
         int option = JOptionPane.showConfirmDialog(Gui.instance.getFrame(), message, title, JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
+            JOptionPane.QUESTION_MESSAGE);
 
         return option == JOptionPane.OK_OPTION;
     }
