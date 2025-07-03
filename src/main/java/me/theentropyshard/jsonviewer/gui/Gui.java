@@ -23,7 +23,6 @@ import com.formdev.flatlaf.FlatIntelliJLaf;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.List;
 
 import me.theentropyshard.jsonviewer.JsonViewer;
@@ -100,46 +99,57 @@ public class Gui {
 
         this.recentFilesMenu = new JMenu("Recent Files");
 
-        List<String> recentFiles = this.jsonViewer.getConfig().getRecentFiles();
-
-        for (String path : recentFiles) {
-            JMenuItem urlItem = new JMenuItem(path);
-            urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
-
-            this.recentFilesMenu.add(urlItem);
-        }
+        this.makeRecentFilesMenu();
 
         fileMenu.add(this.recentFilesMenu);
 
         return menuBar;
     }
 
-    public void addRecentUrl(String url) {
-        JMenuItem urlItem = new JMenuItem(url);
-        urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
+    public void makeRecentUrlsMenu() {
+        this.recentUrlsMenu.removeAll();
 
-        this.recentUrlsMenu.add(urlItem);
+        List<String> recentUrls = this.jsonViewer.getConfig().getRecentUrls();
+
+        for (String url : recentUrls) {
+            JMenuItem urlItem = new JMenuItem(url);
+            urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
+
+            this.recentUrlsMenu.add(urlItem);
+        }
+    }
+
+    public void makeRecentFilesMenu() {
+        this.recentFilesMenu.removeAll();
+
+        List<String> recentFiles = this.jsonViewer.getConfig().getRecentFiles();
+
+        for (String path : recentFiles) {
+            JMenuItem fileItem = new JMenuItem(path);
+            fileItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
+
+            this.recentFilesMenu.add(fileItem);
+        }
+    }
+
+    public void addRecentUrl(String url) {
+        this.jsonViewer.getConfig().addRecentUrl(url);
+        this.makeRecentUrlsMenu();
+    }
+
+    public void removeRecentUrl(String url) {
+        this.jsonViewer.getConfig().removeRecentUrl(url);
+        this.makeRecentUrlsMenu();
     }
 
     public void addRecentFile(String path) {
-        JMenuItem urlItem = new JMenuItem(path);
-        urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromFile(new File(path), null)));
-
-        this.recentFilesMenu.add(urlItem);
+        this.jsonViewer.getConfig().addRecentFile(path);
+        this.makeRecentFilesMenu();
     }
 
     public void removeRecentFile(String absolutePath) {
-        MenuElement[] subElements = this.recentFilesMenu.getSubElements();
-        for (MenuElement menuElement : subElements) {
-            JPopupMenu popupMenu = (JPopupMenu) menuElement;
-            MenuElement[] popupElements = popupMenu.getSubElements();
-            for (MenuElement popupElement : popupElements) {
-                JMenuItem menuItem = (JMenuItem) popupElement;
-                if (menuItem.getText().equals(absolutePath)) {
-                    this.recentFilesMenu.remove(menuItem);
-                }
-            }
-        }
+        this.jsonViewer.getConfig().removeRecentFile(absolutePath);
+        this.makeRecentFilesMenu();
     }
 
     public static void showErrorDialog(String message) {

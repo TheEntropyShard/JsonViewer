@@ -55,15 +55,43 @@ public class Config {
         return this.recentUrls;
     }
 
-    public void setRecentUrls(List<String> recentUrls) {
-        this.recentUrls = recentUrls;
-    }
-
     public List<String> getRecentFiles() {
         return this.recentFiles;
     }
 
-    public void setRecentFiles(List<String> recentFiles) {
-        this.recentFiles = recentFiles;
+    public void addRecentUrl(String url) {
+        if (this.recentUrls.contains(url)) {
+            this.recentUrls.remove(url);
+            this.recentUrls.add(0, url);
+
+            return;
+        }
+
+        this.recentUrls.add(0, url);
+        if (this.recentUrls.size() > 10) {
+            this.recentUrls = this.recentUrls.subList(0, 10);
+        }
+    }
+
+    public void removeRecentUrl(String url) {
+        this.recentUrls.removeIf(s -> s.equals(url));
+    }
+
+    public void addRecentFile(String path) {
+        if (this.recentFiles.contains(path)) {
+            this.recentFiles.remove(path);
+            this.recentFiles.add(0, path);
+
+            return;
+        }
+
+        this.recentFiles.add(0, path);
+        if (this.recentFiles.size() > 10) {
+            this.recentFiles = this.recentFiles.subList(0, 10);
+        }
+    }
+
+    public void removeRecentFile(String path) {
+        this.recentFiles.removeIf(s -> s.equals(path));
     }
 }

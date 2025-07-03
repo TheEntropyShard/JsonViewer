@@ -116,24 +116,10 @@ public class MainView extends JPanel {
     }
 
     public void addRecentUrl(String url) {
-        List<String> recentUrls = this.config.getRecentUrls();
-
-        if (recentUrls.contains(url)) {
-            return;
-        }
-
-        recentUrls.add(url);
         this.gui.addRecentUrl(url);
     }
 
     public void addRecentFile(String path) {
-        List<String> recentFiles = this.config.getRecentFiles();
-
-        if (recentFiles.contains(path)) {
-            return;
-        }
-
-        recentFiles.add(path);
         this.gui.addRecentFile(path);
     }
 
