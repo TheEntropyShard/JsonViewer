@@ -220,20 +220,7 @@ public class MainView extends JPanel {
                     .build();
 
             HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-
-            Optional<String> optional = response.headers().firstValue("Content-Type");
-            if (optional.isPresent()) {
-                String contentType = optional.get();
-                if (!contentType.startsWith("application/json")) {
-                    Gui.showErrorDialog("Expected JSON, but got " + contentType);
-                    return;
-                } else {
-                    urlText = response.body();
-                }
-            } else {
-                Gui.showErrorDialog("Expected JSON, but got no Content-Type");
-                return;
-            }
+            urlText = response.body();
         } catch (IOException | InterruptedException ex) {
             Gui.showErrorDialog("Unable to load JSON from URL");
             ex.printStackTrace();
