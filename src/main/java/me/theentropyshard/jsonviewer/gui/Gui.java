@@ -34,7 +34,7 @@ public class Gui {
     private final JsonViewer jsonViewer;
 
     private final MainView mainView;
-    private final JFrame frame;
+    public static JFrame frame;
 
     private JMenu recentUrlsMenu;
     private JMenu recentFilesMenu;
@@ -46,14 +46,14 @@ public class Gui {
 
         this.mainView = new MainView(jsonViewer.getConfig(), jsonViewer.getHttpClient(), jsonViewer.getJsonService(), this);
 
-        this.frame = new JFrame("JsonViewer");
-        this.frame.addWindowListener(new SaveConfigListener(jsonViewer.getConfigSavePath(), jsonViewer.getConfig()));
-        this.frame.setJMenuBar(this.makeJMenuBar());
-        this.frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        this.frame.add(this.mainView, BorderLayout.CENTER);
-        this.frame.pack();
-        SwingUtils.centerWindow(this.frame, 0);
-        this.frame.setVisible(true);
+        frame = new JFrame("JsonViewer");
+        frame.addWindowListener(new SaveConfigListener(jsonViewer.getConfigSavePath(), jsonViewer.getConfig()));
+        frame.setJMenuBar(this.makeJMenuBar());
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        frame.add(this.mainView, BorderLayout.CENTER);
+        frame.pack();
+        SwingUtils.centerWindow(frame, 0);
+        frame.setVisible(true);
     }
 
     private void initGui() {
@@ -168,6 +168,6 @@ public class Gui {
     }
 
     public JFrame getFrame() {
-        return this.frame;
+        return frame;
     }
 }

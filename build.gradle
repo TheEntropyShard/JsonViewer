@@ -21,13 +21,18 @@ ext {
     flatlaf = '3.4.1'
     gson = '2.10.1'
     rsyntaxtextarea = '3.4.0'
+    miglayout = '5.3'
     junit = '5.7.2'
+    okhttp = '4.12.0'
 }
 
 dependencies {
     implementation "com.formdev:flatlaf:$flatlaf"
+    implementation "com.formdev:flatlaf-extras:$flatlaf"
     implementation "com.google.code.gson:gson:$gson"
     implementation "com.fifesoft:rsyntaxtextarea:$rsyntaxtextarea"
+    implementation "com.miglayout:miglayout-swing:$miglayout"
+    implementation "com.squareup.okhttp3:okhttp:$okhttp"
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junit"
     testImplementation "org.junit.jupiter:junit-jupiter-engine:$junit"

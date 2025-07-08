@@ -21,8 +21,9 @@ package me.theentropyshard.jsonviewer.gui;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-import me.theentropyshard.jsonviewer.JsonViewer;
+
 import me.theentropyshard.jsonviewer.config.Config;
+import me.theentropyshard.jsonviewer.gui.http.HttpRequestView;
 import me.theentropyshard.jsonviewer.json.JTreeBuilder;
 import me.theentropyshard.jsonviewer.json.JsonService;
 import me.theentropyshard.jsonviewer.utils.MathUtils;
@@ -46,9 +47,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.IntConsumer;
 
 public class MainView extends JPanel {
@@ -291,9 +290,18 @@ public class MainView extends JPanel {
 
     private void onUrlButtonPressed(ActionEvent e) {
         SwingUtils.startWorker(() -> {
-            String input = Gui.showInputDialog("Enter the URL", "Url");
+            //String input = Gui.showInputDialog("Enter the URL", "Url");
 
-            this.getFromUrl(input, null);
+            JDialog dialog = new JDialog(Gui.frame, "Send HTTP request", true);
+            HttpRequestView comp = new HttpRequestView();
+            dialog.add(comp, BorderLayout.CENTER);
+            dialog.getRootPane().setDefaultButton(comp.getSendButton());
+            dialog.pack();
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            SwingUtils.centerWindow(dialog, 0);
+            dialog.setVisible(true);
+
+            //this.getFromUrl("", null);
         });
     }
 
