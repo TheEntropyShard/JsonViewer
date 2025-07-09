@@ -26,7 +26,12 @@ public final class SwingUtils {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() {
-                r.run();
+                try {
+                    r.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
                 return null;
             }
         }.execute();

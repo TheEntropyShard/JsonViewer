@@ -21,14 +21,7 @@ package me.theentropyshard.jsonviewer.gui;
 import com.formdev.flatlaf.FlatClientProperties;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
-
-import me.theentropyshard.jsonviewer.config.Config;
-import me.theentropyshard.jsonviewer.gui.http.HttpRequestView;
-import me.theentropyshard.jsonviewer.json.JTreeBuilder;
-import me.theentropyshard.jsonviewer.json.JsonService;
-import me.theentropyshard.jsonviewer.utils.MathUtils;
-import me.theentropyshard.jsonviewer.utils.SwingUtils;
-import me.theentropyshard.jsonviewer.utils.Utils;
+import okhttp3.*;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -41,18 +34,23 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
+import me.theentropyshard.jsonviewer.config.Config;
+import me.theentropyshard.jsonviewer.gui.http.HttpRequestView;
+import me.theentropyshard.jsonviewer.json.JTreeBuilder;
+import me.theentropyshard.jsonviewer.json.JsonService;
+import me.theentropyshard.jsonviewer.utils.MathUtils;
+import me.theentropyshard.jsonviewer.utils.SwingUtils;
+import me.theentropyshard.jsonviewer.utils.Utils;
+
 public class MainView extends JPanel {
+    private static final OkHttpClient HTTP_CLIENT = new OkHttpClient();
+
     private final Config config;
-    private final HttpClient httpClient;
     private final JsonService jsonService;
     private final Gui gui;
 
@@ -64,11 +62,10 @@ public class MainView extends JPanel {
 
     private int tabCounter;
 
-    public MainView(Config config, HttpClient httpClient, JsonService jsonService, Gui gui) {
+    public MainView(Config config, JsonService jsonService, Gui gui) {
         super(new BorderLayout());
 
         this.config = config;
-        this.httpClient = httpClient;
         this.jsonService = jsonService;
         this.gui = gui;
 
@@ -76,8 +73,8 @@ public class MainView extends JPanel {
         this.names = new HashMap<>();
 
         this.controlPanel = new ControlPanel(
-                this::onFileButtonPressed, this::onUrlButtonPressed, this::onTreeViewerButtonPressed,
-                this::onBeautifyButtonPressed, this::onIndentComboSelected, this::onMinifyButtonPressed
+            this::onFileButtonPressed, this::onUrlButtonPressed, this::onTreeViewerButtonPressed,
+            this::onBeautifyButtonPressed, this::onIndentComboSelected, this::onMinifyButtonPressed
         );
 
         this.viewSelector = new JTabbedPane(JTabbedPane.TOP);
@@ -127,10 +124,10 @@ public class MainView extends JPanel {
         this.getFromFile(file, view);
     }
 
-    public void addTab(String url) {
+    /*public void addTab(String url) {
         JsonView view = this.newTab();
         this.getFromUrl(url, view);
-    }
+    }*/
 
     public JsonView newTab() {
         JsonView jsonView = new JsonView(this);
@@ -180,56 +177,78 @@ public class MainView extends JPanel {
         this.titles.put(tabComponent, tabTitle);
 
         this.viewSelector.setTabComponentAt(
-                this.viewSelector.indexOfComponent(jsonView),
-                new JLayer<>(tabComponent, new DispatchEventLayerUI())
+            this.viewSelector.indexOfComponent(jsonView),
+            new JLayer<>(tabComponent, new DispatchEventLayerUI())
         );
 
         return jsonView;
     }
 
-    public void getFromUrl(String url, JsonView view) {
-        if (url.isEmpty()) {
-            return;
-        }
+    public void getFromUrl(HttpUrl url, String method, Map<String, String> headers, String requestBody) {
+        System.out.println("here 100");
+        SwingUtils.startWorker(() -> {
+            System.out.println("here adwdwdw");
 
-        if (Utils.isUrlInvalid(url)) {
-            Gui.showErrorDialog("Invalid URL: " + url);
-            return;
-        }
+            Request.Builder builder = new Request.Builder().url(url);
 
-        String urlText;
-        try {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .GET()
-                    .build();
+            switch (method) {
+                case "GET" -> {
+                    builder.get();
+                }
 
-            HttpResponse<String> response = this.httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-            urlText = response.body();
-        } catch (IOException | InterruptedException ex) {
-            Gui.showErrorDialog("Unable to load JSON from URL");
-            ex.printStackTrace();
-            return;
-        }
+                case "POST" -> {
+                    if (requestBody == null) {
+                        throw new RuntimeException("Request body must not be null for POST request");
+                    }
 
-        if (this.invalidJson(urlText)) {
-            return;
-        }
+                    RequestBody body = RequestBody.create(
+                        requestBody.getBytes(StandardCharsets.UTF_8), MediaType.get("application/json; charset=utf-8")
+                    );
 
-        this.addRecentUrl(url);
+                    builder.post(body);
+                }
 
-        if (view == null) {
-            view = this.getCurrentView();
-        }
+                case "PUT" -> {
 
-        this.setJsonText(urlText, view);
-        this.names.get(view).setText(Utils.getLastPathComponent(url));
+                }
+
+                case "PATCH" -> {
+
+                }
+
+                case "DELETE" -> {
+
+                }
+            }
+
+            String json;
+
+            try (Response response = MainView.HTTP_CLIENT.newCall(builder.build()).execute()) {
+                json = response.body().string();
+            } catch (IOException e) {
+                Gui.showErrorDialog("Unable to load JSON from URL");
+                e.printStackTrace();
+
+                return;
+            }
+
+            if (this.invalidJson(json)) {
+                return;
+            }
+
+            SwingUtilities.invokeLater(() -> {
+                JsonView view = this.getCurrentView();
+
+                this.setJsonText(json, view);
+                this.names.get(view).setText(Utils.getLastPathComponent(url.toString()));
+            });
+        });
     }
 
     public void getFromFile(File file, JsonView view) {
         if (!file.exists()) {
             boolean remove = Gui.showConfirmDialog("File '" + file.getAbsolutePath() +
-                    " does not exist. Remove from recent files?", "File does not exist");
+                " does not exist. Remove from recent files?", "File does not exist");
             if (remove) {
                 this.config.getRecentFiles().remove(file.getAbsolutePath());
                 this.gui.removeRecentFile(file.getAbsolutePath());
@@ -289,20 +308,22 @@ public class MainView extends JPanel {
     }
 
     private void onUrlButtonPressed(ActionEvent e) {
-        SwingUtils.startWorker(() -> {
-            //String input = Gui.showInputDialog("Enter the URL", "Url");
+        HttpRequestView requestView = new HttpRequestView();
 
-            JDialog dialog = new JDialog(Gui.frame, "Send HTTP request", true);
-            HttpRequestView comp = new HttpRequestView();
-            dialog.add(comp, BorderLayout.CENTER);
-            dialog.getRootPane().setDefaultButton(comp.getSendButton());
-            dialog.pack();
-            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            SwingUtils.centerWindow(dialog, 0);
-            dialog.setVisible(true);
+        JDialog dialog = new JDialog(Gui.frame, "Send HTTP request", true);
 
-            //this.getFromUrl("", null);
+        requestView.getSendButton().addActionListener(event -> {
+            dialog.dispose();
+
+            this.getFromUrl(requestView.getUrl(), requestView.getMethod(), requestView.getHeaders(), null);
         });
+
+        dialog.add(requestView, BorderLayout.CENTER);
+        dialog.getRootPane().setDefaultButton(requestView.getSendButton());
+        dialog.pack();
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        SwingUtils.centerWindow(dialog, 0);
+        dialog.setVisible(true);
     }
 
     private void onTreeViewerButtonPressed(ActionEvent e) {

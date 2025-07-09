@@ -26,12 +26,17 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.util.Map;
+
+import me.theentropyshard.jsonviewer.gui.NameValueView;
 
 public class HttpRequestView extends JPanel {
-    private JTextField inputField;
+    private JTextField urlField;
     private JComboBox<String> httpMethodCombo;
     private JButton sendButton;
-    private QueryParamsView queryParamsView;
+    private NameValueView headersView;
+    private NameValueView queryParamsView;
+    private RequestBodyView requestBodyView;
 
     private HttpUrl url;
 
@@ -43,15 +48,15 @@ public class HttpRequestView extends JPanel {
         this.add(this.makeTopPanel(), BorderLayout.NORTH);
         this.add(this.makeCenterPanel(), BorderLayout.CENTER);
 
-        this.inputField.getDocument().addDocumentListener(new DocumentListener() {
+        this.urlField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                HttpRequestView.this.updateQueryParamsView();
+                HttpRequestView.this.updateUrl();
             }
 
             @Override
             public void removeUpdate(DocumentEvent e) {
-                HttpRequestView.this.updateQueryParamsView();
+                HttpRequestView.this.updateUrl();
             }
 
             @Override
@@ -61,24 +66,24 @@ public class HttpRequestView extends JPanel {
         });
     }
 
-    private void updateQueryParamsView() {
-        String text = HttpRequestView.this.inputField.getText();
+    private void updateUrl() {
+        HttpUrl url = HttpUrl.parse(this.urlField.getText());
 
-        this.queryParamsView.clear();
-
-        HttpUrl url = null;
-        try {
-            url = HttpUrl.get(text);
-        } catch (Exception ex) {
-
-        }
         if (url == null) {
             return;
         }
-        int querySize = url.querySize();
-        for (int i = 0; i < querySize; i++) {
-            this.queryParamsView.addQueryParam();
-            this.queryParamsView.setNameValue(i, url.queryParameterName(i), url.queryParameterValue(i));
+
+        this.url = url;
+
+        this.updateQueryParamsView();
+    }
+
+    private void updateQueryParamsView() {
+        this.queryParamsView.clear();
+
+        for (int i = 0; i < this.url.querySize(); i++) {
+            this.queryParamsView.addRow();
+            this.queryParamsView.setNameValue(i, this.url.queryParameterName(i), this.url.queryParameterValue(i));
         }
     }
 
@@ -94,14 +99,14 @@ public class HttpRequestView extends JPanel {
         gbc.gridx = 0;
         gbc.weightx = 1;
 
-        this.inputField = new JTextField();
-        this.inputField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "https://example.com/file.json");
-        topPanel.add(this.inputField, gbc);
+        this.urlField = new JTextField();
+        this.urlField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "https://example.com/file.json");
+        topPanel.add(this.urlField, gbc);
 
         gbc.gridx = 1;
         gbc.weightx = 0;
 
-        this.httpMethodCombo = new JComboBox<>(new String[]{"GET", "POST", "HEAD", "PUT", "PATCH", "DELETE"});
+        this.httpMethodCombo = new JComboBox<>(new String[]{"GET", "POST", "PUT", "PATCH", "DELETE"});
         topPanel.add(this.httpMethodCombo, gbc);
 
         gbc.gridx = 2;
@@ -116,29 +121,35 @@ public class HttpRequestView extends JPanel {
         JPanel centerPanel = new JPanel(new BorderLayout());
 
         JTabbedPane tabbedPane = new JTabbedPane();
+        centerPanel.add(tabbedPane, BorderLayout.CENTER);
 
-        HttpHeadersView httpHeadersView = new HttpHeadersView();
-        httpHeadersView.setBorder(new EmptyBorder(4, 4, 4, 0));
-        tabbedPane.addTab("Headers", httpHeadersView);
+        this.headersView = new NameValueView();
+        this.headersView.setBorder(new EmptyBorder(4, 4, 4, 0));
+        tabbedPane.addTab("Headers", this.headersView);
 
-        this.queryParamsView = new QueryParamsView();
+        this.queryParamsView = new NameValueView();
         this.queryParamsView.setBorder(new EmptyBorder(4, 4, 4, 0));
         tabbedPane.addTab("Query Params", this.queryParamsView);
-        tabbedPane.addTab("Request Body", new JPanel());
-        centerPanel.add(tabbedPane, BorderLayout.CENTER);
+
+        this.requestBodyView = new RequestBodyView();
+        tabbedPane.addTab("Request Body", this.requestBodyView);
 
         return centerPanel;
     }
 
-    public JTextField getInputField() {
-        return this.inputField;
-    }
-
-    public JComboBox<String> getHttpMethodCombo() {
-        return this.httpMethodCombo;
-    }
-
     public JButton getSendButton() {
         return this.sendButton;
+    }
+
+    public HttpUrl getUrl() {
+        return this.url;
+    }
+
+    public String getMethod() {
+        return String.valueOf(this.httpMethodCombo.getSelectedItem());
+    }
+
+    public Map<String, String> getHeaders() {
+        return this.headersView.getPairs();
     }
 }

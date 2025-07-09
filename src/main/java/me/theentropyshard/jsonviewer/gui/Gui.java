@@ -44,7 +44,7 @@ public class Gui {
 
         this.initGui();
 
-        this.mainView = new MainView(jsonViewer.getConfig(), jsonViewer.getHttpClient(), jsonViewer.getJsonService(), this);
+        this.mainView = new MainView(jsonViewer.getConfig(), jsonViewer.getJsonService(), this);
 
         frame = new JFrame("JsonViewer");
         frame.addWindowListener(new SaveConfigListener(jsonViewer.getConfigSavePath(), jsonViewer.getConfig()));
@@ -89,7 +89,7 @@ public class Gui {
 
             for (String url : recentUrls) {
                 JMenuItem urlItem = new JMenuItem(url);
-                urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
+                //urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
 
                 this.recentUrlsMenu.add(urlItem);
             }
@@ -113,7 +113,7 @@ public class Gui {
 
         for (String url : recentUrls) {
             JMenuItem urlItem = new JMenuItem(url);
-            urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
+            //urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
 
             this.recentUrlsMenu.add(urlItem);
         }

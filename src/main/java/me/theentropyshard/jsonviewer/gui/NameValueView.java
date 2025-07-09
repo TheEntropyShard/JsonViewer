@@ -16,7 +16,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-package me.theentropyshard.jsonviewer.gui.http;
+package me.theentropyshard.jsonviewer.gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
@@ -30,42 +30,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class QueryParamsView extends JPanel {
+public class NameValueView extends JPanel {
     private final Map<Integer, List<Component>> rows;
 
     private final JPanel root;
-    private final JButton addQueryParamButton;
+    private final JButton addRowButton;
 
     private int row;
 
-    private static class ScrollablePanel extends JPanel implements Scrollable {
-        @Override
-        public Dimension getPreferredScrollableViewportSize() {
-            return this.getPreferredSize();
-        }
-
-        @Override
-        public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
-            return 10;
-        }
-
-        @Override
-        public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
-            return 10;
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportWidth() {
-            return true;
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportHeight() {
-            return false;
-        }
-    }
-
-    public QueryParamsView() {
+    public NameValueView() {
         this.setLayout(new BorderLayout());
 
         this.rows = new HashMap<>();
@@ -74,9 +47,9 @@ public class QueryParamsView extends JPanel {
         this.root.setBorder(new EmptyBorder(0, 0, 0, 4));
         this.root.setLayout(new MigLayout("fill, insets 2, gap 5 5", "[50%][50%][]", "[top]"));
 
-        this.addQueryParamButton = new JButton("Add");
-        this.addQueryParamButton.addActionListener(e -> {
-            this.addQueryParam();
+        this.addRowButton = new JButton("Add");
+        this.addRowButton.addActionListener(e -> {
+            this.addRow();
         });
 
         JScrollPane scrollPane = new JScrollPane(
@@ -88,11 +61,11 @@ public class QueryParamsView extends JPanel {
         scrollPane.getVerticalScrollBar().setPreferredSize(new Dimension(0,0));
         this.add(scrollPane, BorderLayout.CENTER);
 
-        this.addQueryParam();
+        this.addRow();
     }
 
-    public Map<String, String> getQueryParams() {
-        Map<String, String> headers = new HashMap<>();
+    public Map<String, String> getPairs() {
+        Map<String, String> pairs = new HashMap<>();
 
         for (Map.Entry<Integer, List<Component>> entry : this.rows.entrySet()) {
             List<Component> components = entry.getValue();
@@ -104,23 +77,14 @@ public class QueryParamsView extends JPanel {
                 continue;
             }
 
-            headers.put(name, value);
+            pairs.put(name, value);
         }
 
-        return headers;
+        return pairs;
     }
 
-    public void setNameValue(int row, String name, String value) {
-        List<Component> components = this.rows.get(row);
-
-        if (components != null) {
-            ((JTextField) components.get(0)).setText(name);
-            ((JTextField) components.get(1)).setText(value);
-        }
-    }
-
-    public void addQueryParam() {
-        this.remove(this.addQueryParamButton);
+    public void addRow() {
+        this.remove(this.addRowButton);
 
         JTextField nameField = new JTextField();
         nameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Name");
@@ -130,7 +94,7 @@ public class QueryParamsView extends JPanel {
         valueField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Value");
         this.root.add(valueField, "growx");
 
-        JButton deleteButton = new JButton(new FlatSVGIcon(QueryParamsView.class.getResource("/assets/images/delete.svg")));
+        JButton deleteButton = new JButton(new FlatSVGIcon(NameValueView.class.getResource("/assets/images/delete.svg")));
         deleteButton.putClientProperty("row", this.row);
         deleteButton.addActionListener(e -> {
             int row = Integer.parseInt(String.valueOf(deleteButton.getClientProperty("row")));
@@ -139,12 +103,21 @@ public class QueryParamsView extends JPanel {
         });
         this.root.add(deleteButton, "wrap");
 
-        this.root.add(this.addQueryParamButton, "span 4, growx, pushy");
+        this.root.add(this.addRowButton, "span 4, growx, pushy");
         this.root.revalidate();
 
         this.rows.put(this.row, Arrays.asList(nameField, valueField, deleteButton));
 
         this.row++;
+    }
+
+    public void setNameValue(int row, String name, String value) {
+        List<Component> components = this.rows.get(row);
+
+        if (components != null) {
+            ((JTextField) components.get(0)).setText(name);
+            ((JTextField) components.get(1)).setText(value);
+        }
     }
 
     public void clear() {
