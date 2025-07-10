@@ -18,7 +18,6 @@
 
 package me.theentropyshard.jsonviewer.codegen;
 
-import com.formdev.flatlaf.util.StringUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,17 +31,25 @@ public class JsonToJava {
     private final String fieldAccessModifier;
     private final NumberType numberType;
     private final String indent;
+    private final boolean useAnnotations;
+    private final boolean generateGetters;
+    private final BooleanGetterPrefix booleanGetterPrefix;
 
     private final List<ClassDef> classes;
 
     public JsonToJava() {
-        this(AccessModifier.PRIVATE, NumberType.INT_AND_FLOAT, " ".repeat(4));
+        this(AccessModifier.PRIVATE, NumberType.INT_AND_FLOAT, " ".repeat(4), false, true, BooleanGetterPrefix.IS);
     }
 
-    public JsonToJava(AccessModifier fieldAccessModifier, NumberType numberType, String indent) {
+    public JsonToJava(AccessModifier fieldAccessModifier, NumberType numberType, String indent,
+                      boolean useAnnotations, boolean generateGetters, BooleanGetterPrefix booleanGetterPrefix) {
+
         this.fieldAccessModifier = fieldAccessModifier.toString();
         this.numberType = numberType;
         this.indent = indent;
+        this.useAnnotations = useAnnotations;
+        this.generateGetters = generateGetters;
+        this.booleanGetterPrefix = booleanGetterPrefix;
 
         this.classes = new ArrayList<>();
     }
@@ -51,6 +58,9 @@ public class JsonToJava {
         private AccessModifier fieldAccessModifier = AccessModifier.PRIVATE;
         private NumberType numberType = NumberType.INT_AND_FLOAT;
         private String indent = " ".repeat(4);
+        private boolean useAnnotations = false;
+        private boolean generateGetters = true;
+        private BooleanGetterPrefix booleanGetterPrefix = BooleanGetterPrefix.IS;
 
         public Builder() {
 
@@ -74,8 +84,29 @@ public class JsonToJava {
             return this;
         }
 
+        public Builder useAnnotations(boolean useAnnotations) {
+            this.useAnnotations = useAnnotations;
+
+            return this;
+        }
+
+        public Builder generateGetters(boolean generateGetters) {
+            this.generateGetters = generateGetters;
+
+            return this;
+        }
+
+        public Builder booleanGetterPrefix(BooleanGetterPrefix booleanGetterPrefix) {
+            this.booleanGetterPrefix = Objects.requireNonNull(booleanGetterPrefix);
+
+            return this;
+        }
+
         public JsonToJava build() {
-            return new JsonToJava(this.fieldAccessModifier, this.numberType, this.indent);
+            return new JsonToJava(
+                this.fieldAccessModifier, this.numberType, this.indent,
+                this.useAnnotations, this.generateGetters, this.booleanGetterPrefix
+            );
         }
     }
 
@@ -90,7 +121,13 @@ public class JsonToJava {
     private String generateTopLevelClass(String innerClasses) {
         ClassDef root = this.classes.get(0);
 
-        StringBuilder rootBuilder = new StringBuilder().append("public class ").append(root.getName()).append(" {\n");
+        StringBuilder rootBuilder = new StringBuilder();
+
+        if (this.useAnnotations) {
+            rootBuilder.append("import com.google.gson.annotations.SerializedName;\n\n");
+        }
+
+        rootBuilder.append("public class ").append(root.getName()).append(" {\n");
 
         this.generateClassContent(root, rootBuilder);
 
@@ -130,12 +167,18 @@ public class JsonToJava {
 
         this.generateConstructor(clz, builder);
 
-        for (FieldDef fld : clz.getFields()) {
-            this.generateGetter(fld, builder);
+        if (this.generateGetters) {
+            for (FieldDef fld : clz.getFields()) {
+                this.generateGetter(fld, builder);
+            }
         }
     }
 
     private void generateField(FieldDef fld, StringBuilder builder) {
+        if (this.useAnnotations) {
+            builder.append(this.indent).append("@SerializedName(\"").append(fld.getName()).append("\")\n");
+        }
+
         builder
             .append(this.indent)
             .append(fld.getModifier())
@@ -153,10 +196,17 @@ public class JsonToJava {
     }
 
     private void generateGetter(FieldDef fld, StringBuilder builder) {
-        builder.append("\n").append(this.indent).append("public").append(" ").append(fld.getType()).append(" ")
-            .append("get").append(Utils.capitalize(fld.getName())).append("() {\n")
-            .append(this.indent.repeat(2)).append("return this.").append(fld.getName()).append(";\n")
-            .append(this.indent).append("}\n");
+        builder.append("\n").append(this.indent).append("public").append(" ").append(fld.getType()).append(" ");
+
+        if (fld.getType().equals("boolean")) {
+            builder.append(this.booleanGetterPrefix.getPrefix());
+        } else {
+            builder.append("get");
+        }
+
+        builder
+            .append(Utils.capitalize(fld.getName())).append("() {\n").append(this.indent.repeat(2))
+            .append("return this.").append(fld.getName()).append(";\n").append(this.indent).append("}\n");
     }
 
     public void parseJsonObject(String name, JsonObject object) {
