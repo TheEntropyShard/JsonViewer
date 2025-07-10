@@ -20,6 +20,8 @@ package me.theentropyshard.jsonviewer.gui.textview;
 
 import me.theentropyshard.jsonviewer.gui.FileDropTarget;
 import me.theentropyshard.jsonviewer.gui.MainView;
+
+import com.formdev.flatlaf.FlatClientProperties;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxScheme;
 import org.fife.ui.rsyntaxtextarea.Token;
@@ -40,6 +42,7 @@ public class JsonTextView extends RTextScrollPane {
         this.textArea.addCaretListener(new TheCaretListener(this.textArea, this.caretListeners));
         this.textArea.setDropTarget(new FileDropTarget(mainView::addTab));
 
+        this.putClientProperty(FlatClientProperties.STYLE, "focusWidth: 0; focusedBorderColor: $Component.borderColor");
         this.setViewportView(this.textArea);
         this.setLineNumbersEnabled(true);
         this.setFoldIndicatorEnabled(true);

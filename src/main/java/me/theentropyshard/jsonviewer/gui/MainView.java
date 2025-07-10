@@ -80,6 +80,7 @@ public class MainView extends JPanel {
 
         this.viewSelector = new JTabbedPane(JTabbedPane.TOP);
         this.viewSelector.setBorder(new EmptyBorder(4, 0, 3, 3));
+        this.viewSelector.putClientProperty(FlatClientProperties.STYLE, "contentSeparatorHeight: 0");
         this.viewSelector.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, Boolean.TRUE);
         this.viewSelector.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (IntConsumer) tab -> {
             if (this.tabCounter == 1) {
@@ -127,6 +128,7 @@ public class MainView extends JPanel {
 
     public JsonView newTab() {
         JsonView jsonView = new JsonView(this);
+        jsonView.setBorder(new EmptyBorder(3, 0, 0, 0));
         this.viewSelector.addTab(null, jsonView);
 
         JLabel tabTitle = new JLabel("Tab " + ++this.tabCounter);
