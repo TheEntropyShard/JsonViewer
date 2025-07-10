@@ -49,13 +49,15 @@ public class FileDropTarget extends DropTarget {
                     for (File file : files) {
                         this.listener.onFileDropped(file);
                     }
+
+                    event.dropComplete(true);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+
+                event.dropComplete(false);
             }
         }
-
-        event.dropComplete(true);
     }
 
     public interface FileDroppedListener {
