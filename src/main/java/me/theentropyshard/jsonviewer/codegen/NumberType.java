@@ -20,5 +20,13 @@ package me.theentropyshard.jsonviewer.codegen;
 
 public enum NumberType {
     INT_AND_FLOAT,
-    LONG_AND_DOUBLE
+    LONG_AND_DOUBLE;
+
+    @Override
+    public String toString() {
+        return switch (this) {
+            case INT_AND_FLOAT -> "<html><b>int</b> and <b>float</b></html>";
+            case LONG_AND_DOUBLE -> "<html><b>long</b> and <b>double</b></html>";
+        };
+    }
 }

@@ -28,6 +28,11 @@ public enum BooleanGetterPrefix {
         this.prefix = prefix;
     }
 
+    @Override
+    public String toString() {
+        return this.getPrefix();
+    }
+
     public String getPrefix() {
         return this.prefix;
     }

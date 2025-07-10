@@ -20,6 +20,7 @@ package me.theentropyshard.jsonviewer.config;
 
 import me.theentropyshard.jsonviewer.utils.IOUtils;
 import me.theentropyshard.jsonviewer.utils.Json;
+import me.theentropyshard.jsonviewer.utils.MathUtils;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,6 +31,13 @@ public class Config {
     private int beautifyIndent = 3;
     private List<String> recentUrls = new ArrayList<>();
     private List<String> recentFiles = new ArrayList<>();
+
+    private int pojoAccessModifier = 1;
+    private int pojoNumberType = 0;
+    private int pojoIndent = 3;
+    private int pojoBooleanGetterPrefix = 1;
+    private boolean pojoUseAnnotations = false;
+    private boolean pojoGenerateGetters = true;
 
     public Config() {
 
@@ -93,5 +101,53 @@ public class Config {
 
     public void removeRecentFile(String path) {
         this.recentFiles.removeIf(s -> s.equals(path));
+    }
+
+    public int getPojoAccessModifier() {
+        return MathUtils.clamp(0, 1, this.pojoAccessModifier);
+    }
+
+    public void setPojoAccessModifier(int pojoAccessModifier) {
+        this.pojoAccessModifier = MathUtils.clamp(0, 1, pojoAccessModifier);
+    }
+
+    public int getPojoNumberType() {
+        return MathUtils.clamp(0, 1, this.pojoNumberType);
+    }
+
+    public void setPojoNumberType(int pojoNumberType) {
+        this.pojoNumberType = MathUtils.clamp(0, 1, pojoNumberType);
+    }
+
+    public int getPojoIndent() {
+        return MathUtils.clamp(0, 3, this.pojoIndent);
+    }
+
+    public void setPojoIndent(int pojoIndent) {
+        this.pojoIndent = MathUtils.clamp(0, 3, pojoIndent);
+    }
+
+    public int getPojoBooleanGetterPrefix() {
+        return MathUtils.clamp(0, 1, this.pojoBooleanGetterPrefix);
+    }
+
+    public void setPojoBooleanGetterPrefix(int pojoBooleanGetterPrefix) {
+        this.pojoBooleanGetterPrefix = MathUtils.clamp(0, 1, pojoBooleanGetterPrefix);
+    }
+
+    public boolean isPojoUseAnnotations() {
+        return this.pojoUseAnnotations;
+    }
+
+    public void setPojoUseAnnotations(boolean pojoUseAnnotations) {
+        this.pojoUseAnnotations = pojoUseAnnotations;
+    }
+
+    public boolean isPojoGenerateGetters() {
+        return this.pojoGenerateGetters;
+    }
+
+    public void setPojoGenerateGetters(boolean pojoGenerateGetters) {
+        this.pojoGenerateGetters = pojoGenerateGetters;
     }
 }

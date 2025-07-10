@@ -36,6 +36,8 @@ public class JsonViewer {
     private Config config;
 
     public JsonViewer() {
+        JsonViewer.instance = this;
+
         this.configSavePath = Paths.get(System.getProperty("user.home"), "JsonViewer.json");
 
         try {
@@ -58,6 +60,8 @@ public class JsonViewer {
 
         SwingUtilities.invokeLater(() -> new Gui(this));
     }
+
+    public static JsonViewer instance;
 
     public Config getConfig() {
         return this.config;

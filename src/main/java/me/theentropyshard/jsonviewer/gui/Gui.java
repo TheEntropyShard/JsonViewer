@@ -108,6 +108,24 @@ public class Gui {
 
         fileMenu.add(this.recentFilesMenu);
 
+        JMenu codeMenu = new JMenu("Code");
+        menuBar.add(codeMenu);
+
+        JMenuItem generatePojoItem = new JMenuItem("Generate POJO");
+        codeMenu.add(generatePojoItem);
+        generatePojoItem.addActionListener(e -> {
+            GeneratePOJOView requestView = new GeneratePOJOView(this.mainView.getCurrentView().getText());
+
+            JDialog dialog = new JDialog(Gui.frame, "Generate POJO (Plain Old Java Object)", true);
+
+            dialog.add(requestView, BorderLayout.CENTER);
+            //dialog.getRootPane().setDefaultButton(requestView.getSendButton());
+            dialog.pack();
+            dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+            SwingUtils.centerWindow(dialog, 0);
+            dialog.setVisible(true);
+        });
+
         return menuBar;
     }
 
