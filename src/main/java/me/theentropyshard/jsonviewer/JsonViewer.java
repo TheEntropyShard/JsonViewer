@@ -18,21 +18,20 @@
 
 package me.theentropyshard.jsonviewer;
 
+import javax.swing.*;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import me.theentropyshard.jsonviewer.config.Config;
 import me.theentropyshard.jsonviewer.gui.Gui;
 import me.theentropyshard.jsonviewer.json.GsonJsonFormatter;
 import me.theentropyshard.jsonviewer.json.GsonJsonValidator;
 import me.theentropyshard.jsonviewer.json.JsonService;
 
-import java.io.IOException;
-import java.net.http.HttpClient;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 public class JsonViewer {
     private final JsonService jsonService;
     private final Path configSavePath;
-    private final HttpClient httpClient;
 
     private Config config;
 
@@ -49,10 +48,6 @@ public class JsonViewer {
 
         this.jsonService = new JsonService(new GsonJsonFormatter(), new GsonJsonValidator());
 
-        System.setProperty("https.protocols", "TLSv1.2,TLSv1.3");
-
-        this.httpClient = HttpClient.newHttpClient();
-
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 Config.save(this.configSavePath, this.config);
@@ -61,11 +56,7 @@ public class JsonViewer {
             }
         }));
 
-        new Gui(this);
-    }
-
-    public static void start() {
-        new JsonViewer();
+        SwingUtilities.invokeLater(() -> new Gui(this));
     }
 
     public Config getConfig() {
@@ -74,10 +65,6 @@ public class JsonViewer {
 
     public JsonService getJsonService() {
         return this.jsonService;
-    }
-
-    public HttpClient getHttpClient() {
-        return this.httpClient;
     }
 
     public Path getConfigSavePath() {

@@ -20,6 +20,6 @@ package me.theentropyshard.jsonviewer;
 
 public class Main {
     public static void main(String[] args) {
-        JsonViewer.start();
+        new JsonViewer();
     }
 }
