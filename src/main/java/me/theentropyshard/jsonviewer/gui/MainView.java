@@ -225,6 +225,8 @@ public class MainView extends JPanel {
             }
 
             SwingUtilities.invokeLater(() -> {
+                this.addRecentUrl(url.toString());
+
                 JsonView view = this.getCurrentView();
 
                 this.setJsonText(json, view);
