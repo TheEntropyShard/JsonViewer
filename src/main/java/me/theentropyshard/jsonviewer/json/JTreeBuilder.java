@@ -40,7 +40,7 @@ public class JTreeBuilder {
                 if (jsonElement.isJsonPrimitive()) {
                     treeNode.add(new DefaultMutableTreeNode("[" + i + "]: " + jsonElement));
                 } else {
-                    treeNode.add(buildTree(String.format("[%d]", i), jsonElement));
+                    treeNode.add(buildTree("[" + i + "]", jsonElement));
                 }
             }
         } else if (root.isJsonObject()) {
