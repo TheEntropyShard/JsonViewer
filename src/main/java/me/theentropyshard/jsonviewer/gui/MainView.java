@@ -41,6 +41,7 @@ import java.util.function.IntConsumer;
 
 import me.theentropyshard.jsonviewer.config.Config;
 import me.theentropyshard.jsonviewer.gui.http.HttpRequestView;
+import me.theentropyshard.jsonviewer.gui.http.RequestBodyView;
 import me.theentropyshard.jsonviewer.json.JTreeBuilder;
 import me.theentropyshard.jsonviewer.json.JsonService;
 import me.theentropyshard.jsonviewer.utils.MathUtils;
@@ -124,11 +125,6 @@ public class MainView extends JPanel {
         this.getFromFile(file, view);
     }
 
-    /*public void addTab(String url) {
-        JsonView view = this.newTab();
-        this.getFromUrl(url, view);
-    }*/
-
     public JsonView newTab() {
         JsonView jsonView = new JsonView(this);
         this.viewSelector.addTab(null, jsonView);
@@ -184,12 +180,10 @@ public class MainView extends JPanel {
         return jsonView;
     }
 
-    public void getFromUrl(HttpUrl url, String method, Map<String, String> headers, String requestBody) {
-        System.out.println("here 100");
+    public void getFromUrl(HttpUrl url, String method, Map<String, String> headers, RequestBodyView.BodyType bodyType, String requestBody) {
         SwingUtils.startWorker(() -> {
-            System.out.println("here adwdwdw");
-
             Request.Builder builder = new Request.Builder().url(url);
+            headers.forEach(builder::header);
 
             switch (method) {
                 case "GET" -> {
@@ -201,8 +195,13 @@ public class MainView extends JPanel {
                         throw new RuntimeException("Request body must not be null for POST request");
                     }
 
+                    MediaType contentType = switch (bodyType) {
+                        case JSON -> MediaType.get("application/json; charset=utf-8");
+                        case FORM -> MediaType.get("application/x-www-form-urlencoded; charset=utf-8");
+                    };
+
                     RequestBody body = RequestBody.create(
-                        requestBody.getBytes(StandardCharsets.UTF_8), MediaType.get("application/json; charset=utf-8")
+                        requestBody.getBytes(StandardCharsets.UTF_8), contentType
                     );
 
                     builder.post(body);
@@ -315,7 +314,13 @@ public class MainView extends JPanel {
         requestView.getSendButton().addActionListener(event -> {
             dialog.dispose();
 
-            this.getFromUrl(requestView.getUrl(), requestView.getMethod(), requestView.getHeaders(), null);
+            this.getFromUrl(
+                requestView.getUrl(),
+                requestView.getMethod(),
+                requestView.getHeaders(),
+                requestView.getBodyType(),
+                requestView.getRequestBody()
+            );
         });
 
         dialog.add(requestView, BorderLayout.CENTER);

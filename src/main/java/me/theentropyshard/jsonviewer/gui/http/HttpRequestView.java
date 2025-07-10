@@ -19,13 +19,21 @@
 package me.theentropyshard.jsonviewer.gui.http;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import okhttp3.FormBody;
 import okhttp3.HttpUrl;
+import okio.*;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import me.theentropyshard.jsonviewer.gui.NameValueView;
@@ -124,11 +132,11 @@ public class HttpRequestView extends JPanel {
         centerPanel.add(tabbedPane, BorderLayout.CENTER);
 
         this.headersView = new NameValueView();
-        this.headersView.setBorder(new EmptyBorder(4, 4, 4, 0));
+        this.headersView.setBorder(new EmptyBorder(4, 4, 4, 4));
         tabbedPane.addTab("Headers", this.headersView);
 
         this.queryParamsView = new NameValueView();
-        this.queryParamsView.setBorder(new EmptyBorder(4, 4, 4, 0));
+        this.queryParamsView.setBorder(new EmptyBorder(4, 4, 4, 4));
         tabbedPane.addTab("Query Params", this.queryParamsView);
 
         this.requestBodyView = new RequestBodyView();
@@ -151,5 +159,34 @@ public class HttpRequestView extends JPanel {
 
     public Map<String, String> getHeaders() {
         return this.headersView.getPairs();
+    }
+
+    public RequestBodyView.BodyType getBodyType() {
+        return this.requestBodyView.getBodyType();
+    }
+
+    public String getRequestBody() {
+        return switch (this.getBodyType()) {
+            case JSON -> this.getJsonBody();
+            case FORM -> {
+                Buffer buffer = new Buffer();
+                try {
+                    FormBody.Builder builder = new FormBody.Builder();
+                    this.getFormData().forEach(builder::add);
+                    builder.build().writeTo(buffer);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+                yield new String(buffer.readByteArray(), StandardCharsets.UTF_8);
+            }
+        };
+    }
+
+    public String getJsonBody() {
+        return this.requestBodyView.getJson();
+    }
+
+    public Map<String, String> getFormData() {
+        return this.requestBodyView.getFormData();
     }
 }

@@ -31,14 +31,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class JsonTextView extends RTextScrollPane {
-    private final MainView mainView;
     private final List<CaretUpdateListener> caretListeners;
     private final RSyntaxTextArea textArea;
 
     public JsonTextView(MainView mainView) {
-        this.mainView = mainView;
         this.caretListeners = new ArrayList<>();
-        this.textArea = this.makeTextArea();
+        this.textArea = JsonTextView.makeTextArea();
+        this.textArea.addCaretListener(new TheCaretListener(this.textArea, this.caretListeners));
+        this.textArea.setDropTarget(new FileDropTarget(mainView::addTab));
+
         this.setViewportView(this.textArea);
         this.setLineNumbersEnabled(true);
         this.setFoldIndicatorEnabled(true);
@@ -49,7 +50,7 @@ public class JsonTextView extends RTextScrollPane {
         this.setText("");
     }
 
-    private RSyntaxTextArea makeTextArea() {
+    public static RSyntaxTextArea makeTextArea() {
         RSyntaxTextArea textArea = new RSyntaxTextArea();
         textArea.setLineWrap(true);
         textArea.setCodeFoldingEnabled(true);
@@ -64,9 +65,6 @@ public class JsonTextView extends RTextScrollPane {
 
         textArea.setFont(textArea.getFont().deriveFont(14.0f));
         textArea.revalidate();
-
-        textArea.addCaretListener(new TheCaretListener(textArea, this.caretListeners));
-        textArea.setDropTarget(new FileDropTarget(this.mainView::addTab));
 
         return textArea;
     }

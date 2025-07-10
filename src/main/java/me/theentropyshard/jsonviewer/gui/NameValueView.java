@@ -44,7 +44,6 @@ public class NameValueView extends JPanel {
         this.rows = new HashMap<>();
 
         this.root = new ScrollablePanel();
-        this.root.setBorder(new EmptyBorder(0, 0, 0, 4));
         this.root.setLayout(new MigLayout("fill, insets 2, gap 5 5", "[50%][50%][]", "[top]"));
 
         this.addRowButton = new JButton("Add");
