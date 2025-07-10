@@ -19,7 +19,6 @@
 package me.theentropyshard.jsonviewer.gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
-import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import okhttp3.*;
 

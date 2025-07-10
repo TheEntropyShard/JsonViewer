@@ -18,7 +18,7 @@
 
 package me.theentropyshard.jsonviewer.gui;
 
-import com.formdev.flatlaf.FlatIntelliJLaf;
+import com.formdev.flatlaf.FlatLaf;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,6 +26,7 @@ import java.io.File;
 import java.util.List;
 
 import me.theentropyshard.jsonviewer.JsonViewer;
+import me.theentropyshard.jsonviewer.gui.laf.LightViewerLaf;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 public class Gui {
@@ -60,9 +61,13 @@ public class Gui {
         Gui.instance = this;
 
         UIManager.put("FileChooser.readOnly", Boolean.TRUE);
+
         JDialog.setDefaultLookAndFeelDecorated(true);
         JFrame.setDefaultLookAndFeelDecorated(true);
-        FlatIntelliJLaf.setup();
+
+        FlatLaf.registerCustomDefaultsSource("themes");
+
+        LightViewerLaf.setup();
     }
 
     // maybe flatten all menus?
