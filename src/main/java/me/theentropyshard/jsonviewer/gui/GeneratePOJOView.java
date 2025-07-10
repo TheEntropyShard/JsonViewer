@@ -26,14 +26,12 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 
 import me.theentropyshard.jsonviewer.JsonViewer;
-import me.theentropyshard.jsonviewer.codegen.AccessModifier;
-import me.theentropyshard.jsonviewer.codegen.BooleanGetterPrefix;
-import me.theentropyshard.jsonviewer.codegen.JsonToJava;
-import me.theentropyshard.jsonviewer.codegen.NumberType;
+import me.theentropyshard.jsonviewer.codegen.*;
 import me.theentropyshard.jsonviewer.utils.Json;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
@@ -47,12 +45,12 @@ public class GeneratePOJOView extends JPanel {
 
         JPanel settingsPanel = new JPanel(new MigLayout(
             "gap 5 5, insets 6 6 5 6",
-            "[][][][][][][][]",
+            "[][][][][][][][][][]",
             "[][][][]"
         ));
         this.add(settingsPanel, BorderLayout.NORTH);
 
-        settingsPanel.add(new JLabel("Field access modifier:"));
+        settingsPanel.add(new JLabel("Field access modifier: "));
         JComboBox<AccessModifier> accessModifierCombo = new JComboBox<>(AccessModifier.values());
         accessModifierCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoAccessModifier());
         accessModifierCombo.addItemListener(e -> {
@@ -64,7 +62,7 @@ public class GeneratePOJOView extends JPanel {
         });
         settingsPanel.add(accessModifierCombo, "growx");
 
-        settingsPanel.add(new JLabel("Number type:"));
+        settingsPanel.add(new JLabel("Number type: "));
         JComboBox<NumberType> numberTypeCombo = new JComboBox<>(NumberType.values());
         numberTypeCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoNumberType());
         numberTypeCombo.addItemListener(e -> {
@@ -76,7 +74,7 @@ public class GeneratePOJOView extends JPanel {
         });
         settingsPanel.add(numberTypeCombo, "growx");
 
-        settingsPanel.add(new JLabel("Indent:"));
+        settingsPanel.add(new JLabel("Indent: "));
         JComboBox<String> indentCombo = new JComboBox<>(new String[]{"1 Space", "2 Space", "3 Space", "4 Space"});
         indentCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoIndent());
         indentCombo.addItemListener(e -> {
@@ -88,7 +86,7 @@ public class GeneratePOJOView extends JPanel {
         });
         settingsPanel.add(indentCombo, "growx");
 
-        settingsPanel.add(new JLabel("Boolean getter prefix:"));
+        settingsPanel.add(new JLabel("Boolean getter prefix: "));
         JComboBox<BooleanGetterPrefix> booleanGetterPrefixCombo = new JComboBox<>(BooleanGetterPrefix.values());
         booleanGetterPrefixCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoBooleanGetterPrefix());
         booleanGetterPrefixCombo.addItemListener(e -> {
@@ -98,7 +96,19 @@ public class GeneratePOJOView extends JPanel {
 
             JsonViewer.instance.getConfig().setPojoBooleanGetterPrefix(booleanGetterPrefixCombo.getSelectedIndex());
         });
-        settingsPanel.add(booleanGetterPrefixCombo, "wrap, growx");
+        settingsPanel.add(booleanGetterPrefixCombo, "growx");
+
+        settingsPanel.add(new JLabel("Array style: "));
+        JComboBox<ArrayStyle> arrayStyleCombo = new JComboBox<>(ArrayStyle.values());
+        arrayStyleCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoArrayStyle());
+        arrayStyleCombo.addItemListener(e -> {
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            JsonViewer.instance.getConfig().setPojoArrayStyle(arrayStyleCombo.getSelectedIndex());
+        });
+        settingsPanel.add(arrayStyleCombo, "wrap, growx");
 
         JCheckBox useAnnotationsCheckbox = new JCheckBox("Use annotations");
         useAnnotationsCheckbox.setSelected(JsonViewer.instance.getConfig().isPojoUseAnnotations());
@@ -114,13 +124,14 @@ public class GeneratePOJOView extends JPanel {
         });
         settingsPanel.add(generateGettersCheckbox, "span 2, wrap");
 
-        settingsPanel.add(new JLabel("Top-level class name:"));
+        settingsPanel.add(new JLabel("Top-level class name: "));
 
         JTextField classNameField = new JTextField("Model");
         classNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Top-level class name");
         settingsPanel.add(classNameField, "span 3, growx");
 
         RSyntaxTextArea textArea = new RSyntaxTextArea();
+        ((DefaultCaret) textArea.getCaret()).setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         textArea.setLineWrap(true);
         textArea.setCodeFoldingEnabled(true);
         textArea.setBracketMatchingEnabled(true);
@@ -146,6 +157,7 @@ public class GeneratePOJOView extends JPanel {
                     .numberType((NumberType) numberTypeCombo.getSelectedItem())
                     .indent(" ".repeat(JsonViewer.instance.getConfig().getPojoIndent()))
                     .booleanGetterPrefix((BooleanGetterPrefix) booleanGetterPrefixCombo.getSelectedItem())
+                    .arrayStyle((ArrayStyle) arrayStyleCombo.getSelectedItem())
                     .useAnnotations(useAnnotationsCheckbox.isSelected())
                     .generateGetters(generateGettersCheckbox.isSelected())
                     .build();

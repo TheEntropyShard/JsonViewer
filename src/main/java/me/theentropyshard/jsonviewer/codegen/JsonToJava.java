@@ -34,15 +34,18 @@ public class JsonToJava {
     private final boolean useAnnotations;
     private final boolean generateGetters;
     private final BooleanGetterPrefix booleanGetterPrefix;
+    private final ArrayStyle arrayStyle;
 
     private final List<ClassDef> classes;
 
     public JsonToJava() {
-        this(AccessModifier.PRIVATE, NumberType.INT_AND_FLOAT, " ".repeat(4), false, true, BooleanGetterPrefix.IS);
+        this(AccessModifier.PRIVATE, NumberType.INT_AND_FLOAT, " ".repeat(4),
+            false, true, BooleanGetterPrefix.IS, ArrayStyle.ARRAY);
     }
 
     public JsonToJava(AccessModifier fieldAccessModifier, NumberType numberType, String indent,
-                      boolean useAnnotations, boolean generateGetters, BooleanGetterPrefix booleanGetterPrefix) {
+                      boolean useAnnotations, boolean generateGetters,
+                      BooleanGetterPrefix booleanGetterPrefix, ArrayStyle arrayStyle) {
 
         this.fieldAccessModifier = fieldAccessModifier.toString();
         this.numberType = numberType;
@@ -50,6 +53,7 @@ public class JsonToJava {
         this.useAnnotations = useAnnotations;
         this.generateGetters = generateGetters;
         this.booleanGetterPrefix = booleanGetterPrefix;
+        this.arrayStyle = arrayStyle;
 
         this.classes = new ArrayList<>();
     }
@@ -61,6 +65,7 @@ public class JsonToJava {
         private boolean useAnnotations = false;
         private boolean generateGetters = true;
         private BooleanGetterPrefix booleanGetterPrefix = BooleanGetterPrefix.IS;
+        private ArrayStyle arrayStyle = ArrayStyle.ARRAY;
 
         public Builder() {
 
@@ -102,10 +107,16 @@ public class JsonToJava {
             return this;
         }
 
+        public Builder arrayStyle(ArrayStyle style) {
+            this.arrayStyle = Objects.requireNonNull(style);
+
+            return this;
+        }
+
         public JsonToJava build() {
             return new JsonToJava(
                 this.fieldAccessModifier, this.numberType, this.indent,
-                this.useAnnotations, this.generateGetters, this.booleanGetterPrefix
+                this.useAnnotations, this.generateGetters, this.booleanGetterPrefix, this.arrayStyle
             );
         }
     }
@@ -113,9 +124,11 @@ public class JsonToJava {
     public String generate(String topLevelName, JsonObject rootObject) {
         this.parseJsonObject(topLevelName, rootObject);
 
+        String innerClasses = this.generateInnerClasses();
+
         Collections.reverse(this.classes);
 
-        return this.generateTopLevelClass(this.generateInnerClasses());
+        return this.generateTopLevelClass(innerClasses);
     }
 
     private String generateTopLevelClass(String innerClasses) {
@@ -145,7 +158,7 @@ public class JsonToJava {
     private String generateInnerClasses() {
         StringBuilder builder = new StringBuilder();
 
-        List<ClassDef> otherTypes = this.classes.subList(1, this.classes.size());
+        List<ClassDef> otherTypes = this.classes.subList(0, this.classes.size() - 1);
 
         for (ClassDef clz : otherTypes) {
             builder.append("public static class ").append(clz.getName()).append(" {\n");
@@ -237,14 +250,14 @@ public class JsonToJava {
 
     private void parseJsonArray(String fieldName, JsonArray array, List<FieldDef> fields) {
         if (array.isEmpty()) {
-            fields.add(new FieldDef(this.fieldAccessModifier, "Object[]", fieldName));
+            fields.add(new FieldDef(this.fieldAccessModifier, this.arrayStyle.create("Object"), fieldName));
         } else {
             JsonElement arrayElement = array.get(0);
 
             if (arrayElement.isJsonPrimitive()) {
-                fields.add(new FieldDef(this.fieldAccessModifier, this.getPrimitiveType(arrayElement.getAsJsonPrimitive()) + "[]", fieldName));
+                fields.add(new FieldDef(this.fieldAccessModifier, this.arrayStyle.create(this.getPrimitiveType(arrayElement.getAsJsonPrimitive())), fieldName));
             } else if (arrayElement.isJsonNull()) {
-                fields.add(new FieldDef(this.fieldAccessModifier, "Object", fieldName));
+                fields.add(new FieldDef(this.fieldAccessModifier, this.arrayStyle.create("Object"), fieldName));
             } else if (arrayElement.isJsonObject()) {
                 String className = Utils.capitalize(fieldName);
 
@@ -252,7 +265,7 @@ public class JsonToJava {
                     className = className.substring(0, className.length() - 1);
                 }
 
-                fields.add(new FieldDef(this.fieldAccessModifier, className + "[]", fieldName));
+                fields.add(new FieldDef(this.fieldAccessModifier, this.arrayStyle.create(className), fieldName));
 
                 this.parseJsonObject(className, arrayElement.getAsJsonObject());
             } else if (arrayElement.isJsonArray()) {

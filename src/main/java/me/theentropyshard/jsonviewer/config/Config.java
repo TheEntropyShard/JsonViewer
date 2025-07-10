@@ -36,6 +36,7 @@ public class Config {
     private int pojoNumberType = 0;
     private int pojoIndent = 3;
     private int pojoBooleanGetterPrefix = 1;
+    private int pojoArrayStyle = 0;
     private boolean pojoUseAnnotations = false;
     private boolean pojoGenerateGetters = true;
 
@@ -133,6 +134,14 @@ public class Config {
 
     public void setPojoBooleanGetterPrefix(int pojoBooleanGetterPrefix) {
         this.pojoBooleanGetterPrefix = MathUtils.clamp(0, 1, pojoBooleanGetterPrefix);
+    }
+
+    public int getPojoArrayStyle() {
+        return MathUtils.clamp(0, 1, this.pojoArrayStyle);
+    }
+
+    public void setPojoArrayStyle(int pojoArrayStyle) {
+        this.pojoArrayStyle = MathUtils.clamp(0, 1, pojoArrayStyle);
     }
 
     public boolean isPojoUseAnnotations() {
