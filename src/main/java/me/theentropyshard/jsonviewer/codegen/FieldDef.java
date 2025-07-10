@@ -18,10 +18,35 @@
 
 package me.theentropyshard.jsonviewer.codegen;
 
-public enum PrimitiveType {
-    INT,
-    LONG,
-    DOUBLE,
-    STRING,
-    BOOLEAN
+public class FieldDef {
+    private final String modifier;
+    private final String type;
+    private final String name;
+
+    public FieldDef(String modifier, String type, String name) {
+        this.modifier = modifier;
+        this.type = type;
+        this.name = name;
+    }
+
+    @Override
+    public String toString() {
+        return "FieldDef{" +
+            "modifier='" + this.modifier + '\'' +
+            ", type='" + this.type + '\'' +
+            ", name='" + this.name + '\'' +
+            '}';
+    }
+
+    public String getModifier() {
+        return this.modifier;
+    }
+
+    public String getType() {
+        return this.type;
+    }
+
+    public String getName() {
+        return this.name;
+    }
 }
