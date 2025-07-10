@@ -23,28 +23,59 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import me.theentropyshard.jsonviewer.utils.Utils;
 
 public class JsonToJava {
     private final String fieldAccessModifier;
     private final NumberType numberType;
+    private final String indent;
 
     private final List<ClassDef> classes;
 
     public JsonToJava() {
-        this(AccessModifier.PRIVATE, NumberType.INT_AND_FLOAT);
+        this(AccessModifier.PRIVATE, NumberType.INT_AND_FLOAT, " ".repeat(4));
     }
 
-    public JsonToJava(AccessModifier fieldAccessModifier, NumberType numberType) {
+    public JsonToJava(AccessModifier fieldAccessModifier, NumberType numberType, String indent) {
         this.fieldAccessModifier = fieldAccessModifier.toString();
         this.numberType = numberType;
+        this.indent = indent;
 
         this.classes = new ArrayList<>();
+    }
+
+    public static final class Builder {
+        private AccessModifier fieldAccessModifier = AccessModifier.PRIVATE;
+        private NumberType numberType = NumberType.INT_AND_FLOAT;
+        private String indent = " ".repeat(4);
+
+        public Builder() {
+
+        }
+
+        public Builder accessModifier(AccessModifier modifier) {
+            this.fieldAccessModifier = Objects.requireNonNull(modifier);
+
+            return this;
+        }
+
+        public Builder numberType(NumberType numberType) {
+            this.numberType = Objects.requireNonNull(numberType);
+
+            return this;
+        }
+
+        public Builder indent(String indent) {
+            this.indent = Objects.requireNonNull(indent);
+
+            return this;
+        }
+
+        public JsonToJava build() {
+            return new JsonToJava(this.fieldAccessModifier, this.numberType, this.indent);
+        }
     }
 
     public String generate(String topLevelName, JsonObject rootObject) {
@@ -61,13 +92,13 @@ public class JsonToJava {
         StringBuilder rootBuilder = new StringBuilder().append("public class ").append(root.getName()).append(" {\n");
 
         for (FieldDef fld : root.getFields()) {
-            JsonToJava.generateField(fld, rootBuilder);
+            this.generateField(fld, rootBuilder);
         }
 
         rootBuilder.append("\n");
 
         for (String line : innerClasses.split("\n")) {
-            rootBuilder.append(" ".repeat(4)).append(line).append("\n");
+            rootBuilder.append(this.indent).append(line).append("\n");
         }
 
         rootBuilder.append("}");
@@ -84,7 +115,7 @@ public class JsonToJava {
             builder.append("public static class ").append(clz.getName()).append(" {\n");
 
             for (FieldDef fld : clz.getFields()) {
-                JsonToJava.generateField(fld, builder);
+                this.generateField(fld, builder);
             }
 
             builder.append("}\n\n");
@@ -93,9 +124,9 @@ public class JsonToJava {
         return builder.toString();
     }
 
-    private static void generateField(FieldDef fld, StringBuilder builder) {
+    private void generateField(FieldDef fld, StringBuilder builder) {
         builder
-            .append(" ".repeat(4))
+            .append(this.indent)
             .append(fld.getModifier())
             .append(" ")
             .append(fld.getType())
