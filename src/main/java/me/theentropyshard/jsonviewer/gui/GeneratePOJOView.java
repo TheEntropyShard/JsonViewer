@@ -155,7 +155,7 @@ public class GeneratePOJOView extends JPanel {
                 JsonToJava jsonToJava = new JsonToJava.Builder()
                     .accessModifier((AccessModifier) accessModifierCombo.getSelectedItem())
                     .numberType((NumberType) numberTypeCombo.getSelectedItem())
-                    .indent(" ".repeat(JsonViewer.instance.getConfig().getPojoIndent()))
+                    .indent(" ".repeat(JsonViewer.instance.getConfig().getPojoIndent() + 1))
                     .booleanGetterPrefix((BooleanGetterPrefix) booleanGetterPrefixCombo.getSelectedItem())
                     .arrayStyle((ArrayStyle) arrayStyleCombo.getSelectedItem())
                     .useAnnotations(useAnnotationsCheckbox.isSelected())
