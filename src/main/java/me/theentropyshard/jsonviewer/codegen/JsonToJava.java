@@ -18,6 +18,7 @@
 
 package me.theentropyshard.jsonviewer.codegen;
 
+import com.formdev.flatlaf.util.StringUtils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -91,9 +92,7 @@ public class JsonToJava {
 
         StringBuilder rootBuilder = new StringBuilder().append("public class ").append(root.getName()).append(" {\n");
 
-        for (FieldDef fld : root.getFields()) {
-            this.generateField(fld, rootBuilder);
-        }
+        this.generateClassContent(root, rootBuilder);
 
         rootBuilder.append("\n");
 
@@ -114,14 +113,26 @@ public class JsonToJava {
         for (ClassDef clz : otherTypes) {
             builder.append("public static class ").append(clz.getName()).append(" {\n");
 
-            for (FieldDef fld : clz.getFields()) {
-                this.generateField(fld, builder);
-            }
+            this.generateClassContent(clz, builder);
 
             builder.append("}\n\n");
         }
 
         return builder.toString();
+    }
+
+    private void generateClassContent(ClassDef clz, StringBuilder builder) {
+        for (FieldDef fld : clz.getFields()) {
+            this.generateField(fld, builder);
+        }
+
+        builder.append("\n");
+
+        this.generateConstructor(clz, builder);
+
+        for (FieldDef fld : clz.getFields()) {
+            this.generateGetter(fld, builder);
+        }
     }
 
     private void generateField(FieldDef fld, StringBuilder builder) {
@@ -133,6 +144,19 @@ public class JsonToJava {
             .append(" ")
             .append(fld.getName())
             .append(";\n");
+    }
+
+    private void generateConstructor(ClassDef clz, StringBuilder builder) {
+        builder.append(this.indent).append("public ").append(clz.getName()).append("() {\n");
+        builder.append(this.indent).append("\n");
+        builder.append(this.indent).append("}\n");
+    }
+
+    private void generateGetter(FieldDef fld, StringBuilder builder) {
+        builder.append("\n").append(this.indent).append("public").append(" ").append(fld.getType()).append(" ")
+            .append("get").append(Utils.capitalize(fld.getName())).append("() {\n")
+            .append(this.indent.repeat(2)).append("return this.").append(fld.getName()).append(";\n")
+            .append(this.indent).append("}\n");
     }
 
     public void parseJsonObject(String name, JsonObject object) {
