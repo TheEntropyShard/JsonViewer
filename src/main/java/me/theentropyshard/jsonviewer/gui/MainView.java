@@ -80,7 +80,7 @@ public class MainView extends JPanel {
         );
 
         this.viewSelector = new JTabbedPane(JTabbedPane.TOP);
-        this.viewSelector.setBorder(new EmptyBorder(3, 0, 3, 3));
+        this.viewSelector.setBorder(new EmptyBorder(4, 0, 3, 3));
         this.viewSelector.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSABLE, Boolean.TRUE);
         this.viewSelector.putClientProperty(FlatClientProperties.TABBED_PANE_TAB_CLOSE_CALLBACK, (IntConsumer) tab -> {
             if (this.tabCounter == 1) {
