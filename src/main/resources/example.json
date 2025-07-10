@@ -1,0 +1,13 @@
+{
+    "hello": "world",
+    "user": {
+        "name": "John",
+        "age": 47,
+        "employed": true,
+        "married": false,
+        "favouriteGames": [
+            "Football",
+            "Basketball"
+        ]
+    }
+}
