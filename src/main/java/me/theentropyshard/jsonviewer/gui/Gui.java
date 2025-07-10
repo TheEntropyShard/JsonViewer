@@ -114,12 +114,12 @@ public class Gui {
         JMenuItem generatePojoItem = new JMenuItem("Generate POJO");
         codeMenu.add(generatePojoItem);
         generatePojoItem.addActionListener(e -> {
-            GeneratePOJOView requestView = new GeneratePOJOView(this.mainView.getCurrentView().getText());
+            GeneratePOJOView pojoView = new GeneratePOJOView(this.mainView.getCurrentView().getText());
 
             JDialog dialog = new JDialog(Gui.frame, "Generate POJO (Plain Old Java Object)", true);
 
-            dialog.add(requestView, BorderLayout.CENTER);
-            //dialog.getRootPane().setDefaultButton(requestView.getSendButton());
+            dialog.add(pojoView, BorderLayout.CENTER);
+            dialog.getRootPane().setDefaultButton(pojoView.getGenerateButton());
             dialog.pack();
             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
             SwingUtils.centerWindow(dialog, 0);

@@ -38,10 +38,18 @@ import me.theentropyshard.jsonviewer.utils.Json;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 public class GeneratePOJOView extends JPanel {
+    private final JButton generateButton;
+
     public GeneratePOJOView(String json) {
         super(new BorderLayout());
 
-        JPanel settingsPanel = new JPanel(new MigLayout("gap 5 5, insets 6 6 5 6", "[left][]", "[][][][]"));
+        this.setPreferredSize(new Dimension(1040, 540));
+
+        JPanel settingsPanel = new JPanel(new MigLayout(
+            "gap 5 5, insets 6 6 5 6",
+            "[][][][][][][][]",
+            "[][][][]"
+        ));
         this.add(settingsPanel, BorderLayout.NORTH);
 
         settingsPanel.add(new JLabel("Field access modifier:"));
@@ -54,7 +62,7 @@ public class GeneratePOJOView extends JPanel {
 
             JsonViewer.instance.getConfig().setPojoAccessModifier(accessModifierCombo.getSelectedIndex());
         });
-        settingsPanel.add(accessModifierCombo, "wrap, growx");
+        settingsPanel.add(accessModifierCombo, "growx");
 
         settingsPanel.add(new JLabel("Number type:"));
         JComboBox<NumberType> numberTypeCombo = new JComboBox<>(NumberType.values());
@@ -66,7 +74,7 @@ public class GeneratePOJOView extends JPanel {
 
             JsonViewer.instance.getConfig().setPojoNumberType(numberTypeCombo.getSelectedIndex());
         });
-        settingsPanel.add(numberTypeCombo, "wrap, growx");
+        settingsPanel.add(numberTypeCombo, "growx");
 
         settingsPanel.add(new JLabel("Indent:"));
         JComboBox<String> indentCombo = new JComboBox<>(new String[]{"1 Space", "2 Space", "3 Space", "4 Space"});
@@ -78,7 +86,7 @@ public class GeneratePOJOView extends JPanel {
 
             JsonViewer.instance.getConfig().setPojoIndent(indentCombo.getSelectedIndex());
         });
-        settingsPanel.add(indentCombo, "wrap, growx");
+        settingsPanel.add(indentCombo, "growx");
 
         settingsPanel.add(new JLabel("Boolean getter prefix:"));
         JComboBox<BooleanGetterPrefix> booleanGetterPrefixCombo = new JComboBox<>(BooleanGetterPrefix.values());
@@ -106,9 +114,11 @@ public class GeneratePOJOView extends JPanel {
         });
         settingsPanel.add(generateGettersCheckbox, "span 2, wrap");
 
+        settingsPanel.add(new JLabel("Top-level class name:"));
+
         JTextField classNameField = new JTextField("Model");
         classNameField.putClientProperty(FlatClientProperties.PLACEHOLDER_TEXT, "Top-level class name");
-        settingsPanel.add(classNameField, "span 2, growx");
+        settingsPanel.add(classNameField, "span 3, growx");
 
         RSyntaxTextArea textArea = new RSyntaxTextArea();
         textArea.setLineWrap(true);
@@ -127,9 +137,9 @@ public class GeneratePOJOView extends JPanel {
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 4));
         this.add(bottomPanel, BorderLayout.SOUTH);
 
-        JButton generateButton = new JButton("Generate");
-        bottomPanel.add(generateButton);
-        generateButton.addActionListener(e -> {
+        this.generateButton = new JButton("Generate");
+        bottomPanel.add(this.generateButton);
+        this.generateButton.addActionListener(e -> {
             SwingUtils.startWorker(() -> {
                 JsonToJava jsonToJava = new JsonToJava.Builder()
                     .accessModifier((AccessModifier) accessModifierCombo.getSelectedItem())
@@ -147,5 +157,9 @@ public class GeneratePOJOView extends JPanel {
                 });
             });
         });
+    }
+
+    public JButton getGenerateButton() {
+        return this.generateButton;
     }
 }
