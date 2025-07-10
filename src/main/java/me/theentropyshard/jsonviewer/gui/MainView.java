@@ -44,6 +44,7 @@ import me.theentropyshard.jsonviewer.gui.http.HttpRequestView;
 import me.theentropyshard.jsonviewer.gui.http.RequestBodyView;
 import me.theentropyshard.jsonviewer.json.JTreeBuilder;
 import me.theentropyshard.jsonviewer.json.JsonService;
+import me.theentropyshard.jsonviewer.utils.Json;
 import me.theentropyshard.jsonviewer.utils.MathUtils;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 import me.theentropyshard.jsonviewer.utils.Utils;
@@ -329,7 +330,7 @@ public class MainView extends JPanel {
             return;
         }
 
-        JsonElement rootElement = new Gson().fromJson(text, JsonElement.class);
+        JsonElement rootElement = Json.parse(text, JsonElement.class);
 
         if (rootElement == null) {
             return;

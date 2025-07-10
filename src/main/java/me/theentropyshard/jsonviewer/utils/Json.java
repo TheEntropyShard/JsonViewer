@@ -28,11 +28,12 @@ import java.util.Map;
 
 public final class Json {
     private static final Gson GSON = new GsonBuilder()
-            .disableHtmlEscaping()
-            //
+        .disableHtmlEscaping()
+        .disableJdkUnsafe()
+        //
 
-            //
-            .create();
+        //
+        .create();
 
     private static final Gson PRETTY_GSON = Json.GSON.newBuilder().setPrettyPrinting().create();
 
