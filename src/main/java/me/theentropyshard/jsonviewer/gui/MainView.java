@@ -185,39 +185,27 @@ public class MainView extends JPanel {
             Request.Builder builder = new Request.Builder().url(url);
             headers.forEach(builder::header);
 
-            switch (method) {
-                case "GET" -> {
-                    builder.get();
-                }
+            if (method.equals("GET")) {
+                builder.get();
+            } else {
+                MediaType contentType = switch (bodyType) {
+                    case JSON -> MediaType.get("application/json; charset=utf-8");
+                    case FORM -> MediaType.get("application/x-www-form-urlencoded; charset=utf-8");
+                };
 
-                case "POST" -> {
-                    if (requestBody == null) {
-                        throw new RuntimeException("Request body must not be null for POST request");
+                RequestBody body = null;
+
+                if (requestBody.trim().isEmpty()) {
+                    if (!method.equals("DELETE")) {
+                        throw new RuntimeException();
                     }
-
-                    MediaType contentType = switch (bodyType) {
-                        case JSON -> MediaType.get("application/json; charset=utf-8");
-                        case FORM -> MediaType.get("application/x-www-form-urlencoded; charset=utf-8");
-                    };
-
-                    RequestBody body = RequestBody.create(
+                } else {
+                    body = RequestBody.create(
                         requestBody.getBytes(StandardCharsets.UTF_8), contentType
                     );
-
-                    builder.post(body);
                 }
 
-                case "PUT" -> {
-
-                }
-
-                case "PATCH" -> {
-
-                }
-
-                case "DELETE" -> {
-
-                }
+                builder.method(method, body);
             }
 
             String json;
