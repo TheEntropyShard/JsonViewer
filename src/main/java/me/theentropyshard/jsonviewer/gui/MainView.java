@@ -38,6 +38,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.IntConsumer;
 
+import me.theentropyshard.jsonviewer.BuildConfig;
+import me.theentropyshard.jsonviewer.JsonViewer;
 import me.theentropyshard.jsonviewer.config.Config;
 import me.theentropyshard.jsonviewer.gui.http.HttpRequestView;
 import me.theentropyshard.jsonviewer.gui.http.RequestBodyView;
@@ -219,6 +221,10 @@ public class MainView extends JPanel {
         SwingUtils.startWorker(() -> {
             Request.Builder builder = new Request.Builder().url(url);
             headers.forEach(builder::header);
+
+            if (!headers.containsKey("User-Agent")) {
+                builder.header("User-Agent", BuildConfig.APP_NAME + "/" + BuildConfig.APP_VERSION);
+            }
 
             if (method.equals("GET")) {
                 builder.get();
