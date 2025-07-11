@@ -19,6 +19,8 @@
 package me.theentropyshard.jsonviewer.gui;
 
 import com.formdev.flatlaf.FlatClientProperties;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.miginfocom.swing.MigLayout;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -129,10 +131,32 @@ public class GeneratePOJOView extends JPanel {
                     .generateGetters(generateGettersCheckbox.isSelected())
                     .build();
 
-                String javaCode = jsonToJava.generate(classNameField.getText(), Json.parse(json, JsonObject.class));
+                JsonElement element = Json.parse(json, JsonElement.class);
+
+                JsonObject jsonObject;
+
+                if (element.isJsonObject()) {
+                    jsonObject = element.getAsJsonObject();
+                } else if (element.isJsonArray()) {
+                    JsonArray array = element.getAsJsonArray();
+
+                    if (array.isEmpty()) {
+                        return;
+                    } else {
+                        JsonElement arrayElement = array.get(0);
+
+                        if (arrayElement.isJsonObject()) {
+                            jsonObject = arrayElement.getAsJsonObject();
+                        } else {
+                            return;
+                        }
+                    }
+                } else {
+                    return;
+                }
 
                 SwingUtilities.invokeLater(() -> {
-                    textArea.setText(javaCode);
+                    textArea.setText(jsonToJava.generate(classNameField.getText(), jsonObject));
                 });
             });
         };
