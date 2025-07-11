@@ -6,7 +6,7 @@ plugins {
 }
 
 group = 'me.theentropyshard'
-version = '0.7.3'
+version = '0.8.0'
 description = 'JsonViewer'
 
 def theMainClass = 'me.theentropyshard.jsonviewer.Main'
