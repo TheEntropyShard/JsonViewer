@@ -26,6 +26,8 @@ import org.fife.ui.rtextarea.RTextScrollPane;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -38,92 +40,46 @@ import me.theentropyshard.jsonviewer.utils.Json;
 import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 public class GeneratePOJOView extends JPanel {
-    private final JButton generateButton;
-
     public GeneratePOJOView(String json) {
         super(new BorderLayout());
 
         this.setPreferredSize(new Dimension(1040, 540));
 
-        JPanel settingsPanel = new JPanel(new MigLayout(
-            "gap 5 5, insets 6 6 5 6",
-            "[][][][][][][][][][]",
-            "[][][][]"
-        ));
+        JPanel settingsPanel = new JPanel();
+        settingsPanel.setLayout(new MigLayout("gap 5 5, insets 6 6 5 6", "[][][][][][][][][][]", "[][][][]"));
         this.add(settingsPanel, BorderLayout.NORTH);
 
         settingsPanel.add(new JLabel("Field access modifier: "));
         JComboBox<AccessModifier> accessModifierCombo = new JComboBox<>(AccessModifier.values());
         accessModifierCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoAccessModifier());
-        accessModifierCombo.addItemListener(e -> {
-            if (e.getStateChange() != ItemEvent.SELECTED) {
-                return;
-            }
-
-            JsonViewer.instance.getConfig().setPojoAccessModifier(accessModifierCombo.getSelectedIndex());
-        });
         settingsPanel.add(accessModifierCombo, "growx");
 
         settingsPanel.add(new JLabel("Number type: "));
         JComboBox<NumberType> numberTypeCombo = new JComboBox<>(NumberType.values());
         numberTypeCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoNumberType());
-        numberTypeCombo.addItemListener(e -> {
-            if (e.getStateChange() != ItemEvent.SELECTED) {
-                return;
-            }
-
-            JsonViewer.instance.getConfig().setPojoNumberType(numberTypeCombo.getSelectedIndex());
-        });
         settingsPanel.add(numberTypeCombo, "growx");
 
         settingsPanel.add(new JLabel("Indent: "));
         JComboBox<String> indentCombo = new JComboBox<>(new String[]{"1 Space", "2 Space", "3 Space", "4 Space"});
         indentCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoIndent());
-        indentCombo.addItemListener(e -> {
-            if (e.getStateChange() != ItemEvent.SELECTED) {
-                return;
-            }
-
-            JsonViewer.instance.getConfig().setPojoIndent(indentCombo.getSelectedIndex());
-        });
         settingsPanel.add(indentCombo, "growx");
 
         settingsPanel.add(new JLabel("Boolean getter prefix: "));
         JComboBox<BooleanGetterPrefix> booleanGetterPrefixCombo = new JComboBox<>(BooleanGetterPrefix.values());
         booleanGetterPrefixCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoBooleanGetterPrefix());
-        booleanGetterPrefixCombo.addItemListener(e -> {
-            if (e.getStateChange() != ItemEvent.SELECTED) {
-                return;
-            }
-
-            JsonViewer.instance.getConfig().setPojoBooleanGetterPrefix(booleanGetterPrefixCombo.getSelectedIndex());
-        });
         settingsPanel.add(booleanGetterPrefixCombo, "growx");
 
         settingsPanel.add(new JLabel("Array style: "));
         JComboBox<ArrayStyle> arrayStyleCombo = new JComboBox<>(ArrayStyle.values());
         arrayStyleCombo.setSelectedIndex(JsonViewer.instance.getConfig().getPojoArrayStyle());
-        arrayStyleCombo.addItemListener(e -> {
-            if (e.getStateChange() != ItemEvent.SELECTED) {
-                return;
-            }
-
-            JsonViewer.instance.getConfig().setPojoArrayStyle(arrayStyleCombo.getSelectedIndex());
-        });
         settingsPanel.add(arrayStyleCombo, "wrap, growx");
 
         JCheckBox useAnnotationsCheckbox = new JCheckBox("Use annotations");
         useAnnotationsCheckbox.setSelected(JsonViewer.instance.getConfig().isPojoUseAnnotations());
-        useAnnotationsCheckbox.addActionListener(e -> {
-            JsonViewer.instance.getConfig().setPojoUseAnnotations(useAnnotationsCheckbox.isSelected());
-        });
         settingsPanel.add(useAnnotationsCheckbox, "span 2, wrap");
 
         JCheckBox generateGettersCheckbox = new JCheckBox("Generate getters");
         generateGettersCheckbox.setSelected(JsonViewer.instance.getConfig().isPojoGenerateGetters());
-        generateGettersCheckbox.addActionListener(e -> {
-            JsonViewer.instance.getConfig().setPojoGenerateGetters(generateGettersCheckbox.isSelected());
-        });
         settingsPanel.add(generateGettersCheckbox, "span 2, wrap");
 
         settingsPanel.add(new JLabel("Top-level class name: "));
@@ -157,9 +113,11 @@ public class GeneratePOJOView extends JPanel {
             clipboard.setContents(new StringSelection(textArea.getText()), null);
         });
 
-        this.generateButton = new JButton("Generate");
-        bottomPanel.add(this.generateButton);
-        this.generateButton.addActionListener(e -> {
+        Runnable generate = () -> {
+            if (json == null || json.trim().isEmpty()) {
+                return;
+            }
+
             SwingUtils.startWorker(() -> {
                 JsonToJava jsonToJava = new JsonToJava.Builder()
                     .accessModifier((AccessModifier) accessModifierCombo.getSelectedItem())
@@ -177,10 +135,91 @@ public class GeneratePOJOView extends JPanel {
                     textArea.setText(javaCode);
                 });
             });
-        });
-    }
+        };
 
-    public JButton getGenerateButton() {
-        return this.generateButton;
+        generate.run();
+
+        accessModifierCombo.addItemListener(e -> {
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            JsonViewer.instance.getConfig().setPojoAccessModifier(accessModifierCombo.getSelectedIndex());
+
+            generate.run();
+        });
+
+        numberTypeCombo.addItemListener(e -> {
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            JsonViewer.instance.getConfig().setPojoNumberType(numberTypeCombo.getSelectedIndex());
+
+            generate.run();
+        });
+
+        indentCombo.addItemListener(e -> {
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            JsonViewer.instance.getConfig().setPojoIndent(indentCombo.getSelectedIndex());
+
+            generate.run();
+        });
+
+        booleanGetterPrefixCombo.addItemListener(e -> {
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            JsonViewer.instance.getConfig().setPojoBooleanGetterPrefix(booleanGetterPrefixCombo.getSelectedIndex());
+
+            generate.run();
+        });
+
+        arrayStyleCombo.addItemListener(e -> {
+            if (e.getStateChange() != ItemEvent.SELECTED) {
+                return;
+            }
+
+            JsonViewer.instance.getConfig().setPojoArrayStyle(arrayStyleCombo.getSelectedIndex());
+
+            generate.run();
+        });
+
+        useAnnotationsCheckbox.addActionListener(e -> {
+            JsonViewer.instance.getConfig().setPojoUseAnnotations(useAnnotationsCheckbox.isSelected());
+
+            generate.run();
+        });
+
+        generateGettersCheckbox.addActionListener(e -> {
+            JsonViewer.instance.getConfig().setPojoGenerateGetters(generateGettersCheckbox.isSelected());
+
+            generate.run();
+        });
+
+        classNameField.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                this.update();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                this.update();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+
+            }
+
+            private void update() {
+                generate.run();
+            }
+        });
     }
 }
