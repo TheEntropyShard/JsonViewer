@@ -18,6 +18,8 @@
 
 package me.theentropyshard.jsonviewer.gui.treeview;
 
+import com.formdev.flatlaf.FlatClientProperties;
+
 import me.theentropyshard.jsonviewer.gui.FileDropTarget;
 import me.theentropyshard.jsonviewer.gui.MainView;
 
@@ -34,6 +36,7 @@ public class JsonTreeView extends JScrollPane {
         this.mainView = mainView;
         this.jsonTree = this.makeJsonTree();
         this.setViewportView(this.jsonTree);
+        this.putClientProperty(FlatClientProperties.STYLE, "focusWidth: 0; focusedBorderColor: $Component.borderColor");
     }
 
     public void clear() {
