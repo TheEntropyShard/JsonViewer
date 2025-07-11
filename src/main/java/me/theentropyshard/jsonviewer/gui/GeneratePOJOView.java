@@ -28,6 +28,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.text.DefaultCaret;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ItemEvent;
 
 import me.theentropyshard.jsonviewer.JsonViewer;
@@ -147,6 +149,13 @@ public class GeneratePOJOView extends JPanel {
 
         JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 4, 4));
         this.add(bottomPanel, BorderLayout.SOUTH);
+
+        JButton copyButton = new JButton("Copy");
+        bottomPanel.add(copyButton);
+        copyButton.addActionListener(e -> {
+            Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+            clipboard.setContents(new StringSelection(textArea.getText()), null);
+        });
 
         this.generateButton = new JButton("Generate");
         bottomPanel.add(this.generateButton);
