@@ -103,6 +103,39 @@ public class MainView extends JPanel {
         this.setDropTarget(new FileDropTarget(this::addTab));
     }
 
+    public void showUrlDialog() {
+        this.showUrlDialog(null);
+    }
+
+    public void showUrlDialog(String url) {
+        HttpRequestView requestView = new HttpRequestView();
+
+        if (url != null && !url.trim().isEmpty()) {
+            requestView.setUrl(url);
+        }
+
+        JDialog dialog = new JDialog(Gui.frame, "Send HTTP request", true);
+
+        requestView.getSendButton().addActionListener(event -> {
+            dialog.dispose();
+
+            this.getFromUrl(
+                requestView.getUrl(),
+                requestView.getMethod(),
+                requestView.getHeaders(),
+                requestView.getBodyType(),
+                requestView.getRequestBody()
+            );
+        });
+
+        dialog.add(requestView, BorderLayout.CENTER);
+        dialog.getRootPane().setDefaultButton(requestView.getSendButton());
+        dialog.pack();
+        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+        SwingUtils.centerWindow(dialog, 0);
+        dialog.setVisible(true);
+    }
+
     public JsonView getCurrentView() {
         int selectedIndex = this.viewSelector.getSelectedIndex();
         if (selectedIndex == -1) {
@@ -299,28 +332,7 @@ public class MainView extends JPanel {
     }
 
     private void onUrlButtonPressed(ActionEvent e) {
-        HttpRequestView requestView = new HttpRequestView();
-
-        JDialog dialog = new JDialog(Gui.frame, "Send HTTP request", true);
-
-        requestView.getSendButton().addActionListener(event -> {
-            dialog.dispose();
-
-            this.getFromUrl(
-                requestView.getUrl(),
-                requestView.getMethod(),
-                requestView.getHeaders(),
-                requestView.getBodyType(),
-                requestView.getRequestBody()
-            );
-        });
-
-        dialog.add(requestView, BorderLayout.CENTER);
-        dialog.getRootPane().setDefaultButton(requestView.getSendButton());
-        dialog.pack();
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        SwingUtils.centerWindow(dialog, 0);
-        dialog.setVisible(true);
+        this.showUrlDialog();
     }
 
     private void onTreeViewerButtonPressed(ActionEvent e) {

@@ -94,7 +94,7 @@ public class Gui {
 
             for (String url : recentUrls) {
                 JMenuItem urlItem = new JMenuItem(url);
-                //urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
+                urlItem.addActionListener(e -> this.mainView.showUrlDialog(url));
 
                 this.recentUrlsMenu.add(urlItem);
             }
@@ -132,7 +132,7 @@ public class Gui {
 
         for (String url : recentUrls) {
             JMenuItem urlItem = new JMenuItem(url);
-            //urlItem.addActionListener(e -> SwingUtils.startWorker(() -> this.mainView.getFromUrl(url, null)));
+            urlItem.addActionListener(e -> this.mainView.showUrlDialog(url));
 
             this.recentUrlsMenu.add(urlItem);
         }

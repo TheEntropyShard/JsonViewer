@@ -21,8 +21,7 @@ package me.theentropyshard.jsonviewer.gui.http;
 import com.formdev.flatlaf.FlatClientProperties;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
-import okio.*;
-import org.jetbrains.annotations.NotNull;
+import okio.Buffer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,9 +29,6 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -72,6 +68,10 @@ public class HttpRequestView extends JPanel {
 
             }
         });
+    }
+
+    public void setUrl(String url) {
+        this.urlField.setText(url);
     }
 
     private void updateUrl() {
