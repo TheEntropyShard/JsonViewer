@@ -261,7 +261,9 @@ public class JsonToJava {
             } else if (arrayElement.isJsonObject()) {
                 String className = Utils.capitalize(fieldName);
 
-                if (className.endsWith("s")) {
+                if (className.endsWith("ies")) {
+                    className = className.substring(0, className.length() - 3) + "y";
+                } else if (className.endsWith("s")) {
                     className = className.substring(0, className.length() - 1);
                 }
 
