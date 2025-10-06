@@ -20,7 +20,7 @@ repositories {
 ext {
     flatlaf = '3.6.1'
     gson = '2.10.1'
-    rsyntaxtextarea = '3.4.0'
+    rsyntaxtextarea = '3.6.0'
     miglayout = '5.3'
     junit = '5.7.2'
     okhttp = '4.12.0'
