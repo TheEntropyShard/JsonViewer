@@ -18,7 +18,7 @@ repositories {
 }
 
 ext {
-    flatlaf = '3.4.1'
+    flatlaf = '3.6.1'
     gson = '2.10.1'
     rsyntaxtextarea = '3.4.0'
     miglayout = '5.3'
