@@ -52,6 +52,18 @@ public final class SwingUtils {
         );
     }
 
+    public static int getCurrentDisplayIndex(Window window) {
+        GraphicsDevice[] devices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+
+        for (int i = 0; i < devices.length; i++) {
+            if (devices[i].equals(window.getGraphicsConfiguration().getDevice())) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     private SwingUtils() {
         throw new UnsupportedOperationException();
     }

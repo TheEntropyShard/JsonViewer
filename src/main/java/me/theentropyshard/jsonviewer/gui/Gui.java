@@ -53,7 +53,7 @@ public class Gui {
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.add(this.mainView, BorderLayout.CENTER);
         frame.pack();
-        SwingUtils.centerWindow(frame, 0);
+        SwingUtils.centerWindow(frame, jsonViewer.getConfig().getLastDisplay());
         frame.setVisible(true);
     }
 
@@ -118,7 +118,7 @@ public class Gui {
             dialog.add(new GeneratePOJOView(this.mainView.getCurrentView().getText()), BorderLayout.CENTER);
             dialog.pack();
             dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-            SwingUtils.centerWindow(dialog, 0);
+            SwingUtils.centerWindow(dialog, this.jsonViewer.getConfig().getLastDisplay());
             dialog.setVisible(true);
         });
 

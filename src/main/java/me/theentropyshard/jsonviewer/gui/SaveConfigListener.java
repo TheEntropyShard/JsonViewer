@@ -18,12 +18,13 @@
 
 package me.theentropyshard.jsonviewer.gui;
 
-import me.theentropyshard.jsonviewer.config.Config;
-
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.nio.file.Path;
+
+import me.theentropyshard.jsonviewer.config.Config;
+import me.theentropyshard.jsonviewer.utils.SwingUtils;
 
 public class SaveConfigListener extends WindowAdapter {
     private final Path savePath;
@@ -36,6 +37,8 @@ public class SaveConfigListener extends WindowAdapter {
 
     @Override
     public void windowClosing(WindowEvent e) {
+        this.config.setLastDisplay(SwingUtils.getCurrentDisplayIndex(e.getWindow()));
+
         try {
             Config.save(this.savePath, this.config);
         } catch (IOException ex) {

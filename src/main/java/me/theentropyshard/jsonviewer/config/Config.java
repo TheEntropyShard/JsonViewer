@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Config {
+    private int lastDisplay;
     private int beautifyIndent = 3;
     private List<String> recentUrls = new ArrayList<>();
     private List<String> recentFiles = new ArrayList<>();
@@ -50,6 +51,14 @@ public class Config {
 
     public static void save(Path file, Config config) throws IOException {
         IOUtils.writeUtf8String(file, Json.write(config));
+    }
+
+    public int getLastDisplay() {
+        return this.lastDisplay;
+    }
+
+    public void setLastDisplay(int lastDisplay) {
+        this.lastDisplay = lastDisplay;
     }
 
     public int getBeautifyIndent() {
